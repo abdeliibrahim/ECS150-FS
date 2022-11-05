@@ -58,6 +58,15 @@ int fs_mount(const char *diskname)
 	// check if disk gives error
 	if (block_disk_open(diskname) == -1)
 		return block_disk_open(diskname);
+	
+	block_read(0, &superblock);
+
+	if (strcmp("ECS150FS", superblock.sig) == -1) {
+		fprintf(stderr, "Signature not accepted");
+		return -1;
+	}
+
+
 
 	
 	
