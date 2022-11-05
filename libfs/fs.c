@@ -30,7 +30,7 @@ struct __attribute__((packed)) FAT {
 
 };
 
-struct __attribute__((packed)) Entry {
+struct __attribute__((packed)) RootDir {
 	uint8_t filename[FS_FILENAME_LEN];
 	uint32_t fileSize;
 	uint16_t firstBlockIn;
@@ -39,14 +39,14 @@ struct __attribute__((packed)) Entry {
 	uint8_t padding[10];
 
 };
-struct __attribute__((packed)) RootDir {
-	struct Entry rootDir[FS_FILE_MAX_COUNT];
-};
+// struct __attribute__((packed)) RootDir {
+// 	struct Entry rootDir[FS_FILE_MAX_COUNT];
+// };
 
 
 // global Superblock, Root Directory, and FAT
  struct Superblock superblock;
- struct RootDir rd;
+ struct RootDir *rd;
  struct FAT fat;
 
 /* TODO: Phase 1 */
@@ -59,7 +59,7 @@ int fs_mount(const char *diskname)
 	if (block_disk_open(diskname) == -1)
 		return block_disk_open(diskname);
 
-	block_disk_open(diskname);
+	
 	
 	
 
