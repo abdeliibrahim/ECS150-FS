@@ -61,7 +61,7 @@ int fs_mount(const char *diskname)
 	
 	/* read 0th block from the @disk to the superblock,
 	return -1 if errors */
-	if (block_read(0, &superblock));
+	if (block_read(0, &superblock))
 		return -1;
 
 	/* now that the first block is in the superblock,
@@ -93,56 +93,79 @@ int fs_umount(void)
 int fs_info(void)
 {
 	/* TODO: Phase 1 */
+	printf("FS Info:\n");
+	printf("total_block_count=%i\n",superblock.totalBlocks);
+	printf("fat_blk_count=%i\n",superblock.fatBlocks);
+	printf("redir_blk=%i\n",superblock.rootBlockIndex);
+	printf("data_blk=%i\n",superblock.dataBlockStart);
+	printf("data_blk_count=%i\n",superblock.dataBlockCt);
+
+	//TODO: Fat free ratio, rdir free ratio
+
+	/* format: 
+	fat_free_ratio=8191/8192
+	rdir_free_ratio=128/128
+*/
+	return 0;
 
 }
 
 int fs_create(const char *filename)
 {
 	/* TODO: Phase 2 */
+	return 0;
 }
 
 int fs_delete(const char *filename)
 {
 	/* TODO: Phase 2 */
+	return 0;
 }
 
 int fs_ls(void)
 {
 	/* TODO: Phase 2 */
+	return 0;
 }
 
 int fs_open(const char *filename)
 {
 	/* TODO: Phase 3 */
+	return 0;
 }
 
 int fs_close(int fd)
 {
 	/* TODO: Phase 3 */
+	return 0;
 }
 
 int fs_stat(int fd)
 {
 	/* TODO: Phase 3 */
+	return 0;
 }
 
 int fs_lseek(int fd, size_t offset)
 {
 	/* TODO: Phase 3 */
+	return 0;
 }
 
 int fs_write(int fd, void *buf, size_t count)
 {
 	/* TODO: Phase 4 */
+	return 0;
 }
 
 int fs_read(int fd, void *buf, size_t count)
 {
-	struct Superblock obj;
-	block_read(fd, sizeof(obj));
+	//struct Superblock obj;
+	//block_read(fd, sizeof(obj));
 	//slide 15 project disc
 
 
 	/* TODO: Phase 4 */
+	return 0;
 }
 
