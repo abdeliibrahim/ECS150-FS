@@ -93,6 +93,7 @@ int fs_umount(void)
 int fs_info(void)
 {
 	/* TODO: Phase 1 */
+
 }
 
 int fs_create(const char *filename)
