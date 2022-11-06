@@ -30,7 +30,7 @@ struct __attribute__((packed)) FAT {
 
 };
 
-struct __attribute__((packed)) RootDir {
+struct __attribute__((packed)) Entry {
 	uint8_t filename[FS_FILENAME_LEN];
 	uint32_t fileSize;
 	uint16_t firstBlockIn;
@@ -39,9 +39,9 @@ struct __attribute__((packed)) RootDir {
 	uint8_t padding[10];
 
 };
-// struct __attribute__((packed)) RootDir {
-// 	struct Entry rootDir[FS_FILE_MAX_COUNT];
-// };
+struct __attribute__((packed)) RootDir {
+	struct Entry rootDir[FS_FILE_MAX_COUNT];
+};
 
 
 // global Superblock, Root Directory, and FAT
@@ -93,19 +93,34 @@ int fs_umount(void)
 int fs_info(void)
 {
 	/* TODO: Phase 1 */
+
+	int i, fatFree, rdFree= 0;
+	uint8_t fileEmpty = 0;
+	
+	/* Calculating fat free blocks */
+	for(i; i<superblock.dataBlockCt; i++) {
+		if(fat.flatArray[i] == 0)
+			fatFree++;
+	}
+	/* Calculating rdir free files. */
+	for(i=0; i<FS_FILE_MAX_COUNT; i++) {
+		if(rd->rootDir->filename[0] == fileEmpty)
+			rdFree++;
+	}
+
+	/* On format specifiers for (un)signed integers:
+	https://www.geeksforgeeks.org/difference-d-format-specifier-c-language/ */
 	printf("FS Info:\n");
 	printf("total_block_count=%i\n",superblock.totalBlocks);
 	printf("fat_blk_count=%i\n",superblock.fatBlocks);
 	printf("redir_blk=%i\n",superblock.rootBlockIndex);
 	printf("data_blk=%i\n",superblock.dataBlockStart);
 	printf("data_blk_count=%i\n",superblock.dataBlockCt);
+	printf("fat_free_ratio=%d/%i\n", fatFree, superblock.dataBlockCt);
+	printf("rdir_free_ratio=%d/%i\n", rdFree, FS_FILE_MAX_COUNT);
+	
 
-	//TODO: Fat free ratio, rdir free ratio
 
-	/* format: 
-	fat_free_ratio=8191/8192
-	rdir_free_ratio=128/128
-*/
 	return 0;
 
 }
