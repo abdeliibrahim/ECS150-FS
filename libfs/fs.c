@@ -55,12 +55,17 @@ int fs_mount(const char *diskname)
 {
 	/* TODO: Phase 1 */
 	
-	// check if disk gives error
-	if (block_disk_open(diskname) == -1)
-		return block_disk_open(diskname);
+	// open disk, return -1 if open errors
+	if (block_disk_open(diskname))
+		return -1;
 	
-	block_read(0, &superblock);
+	/* read 0th block from the @disk to the superblock,
+	return -1 if errors */
+	if (block_read(0, &superblock));
+		return -1;
 
+	/* now that the first block is in the superblock,
+	check if the signature is correct */
 	if (strcmp("ECS150FS", superblock.sig) == -1) {
 		fprintf(stderr, "Signature not accepted");
 		return -1;
@@ -78,6 +83,8 @@ int fs_mount(const char *diskname)
 int fs_umount(void)
 {
 	/* TODO: Phase 1 */
+
+	
 
 	return 0;
 }
