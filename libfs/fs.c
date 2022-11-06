@@ -71,7 +71,7 @@ int fs_mount(const char *diskname)
 		return -1;
 	}
 
-
+    //Hello THis is ALi
 
 	
 	
