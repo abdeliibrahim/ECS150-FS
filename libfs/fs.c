@@ -95,7 +95,7 @@ int fs_info(void)
 	/* TODO: Phase 1 */
 
 	int i, fatFree, rdFree= 0;
-	uint8_t fileEmpty = 0;
+	
 	
 	/* Calculating fat free blocks */
 	for(i; i<superblock.dataBlockCt; i++) {
@@ -104,20 +104,22 @@ int fs_info(void)
 	}
 	/* Calculating rdir free files. */
 	for(i=0; i<FS_FILE_MAX_COUNT; i++) {
-		if(rd.rootDir[i].filename[0] == fileEmpty)
+		/* "An empty entry is defined by the first character of
+		the entry’s filename being equal to the NULL character." */
+		if(rd.rootDir[i].filename[0] == NULL)
 			rdFree++;
 	}
 
 	/* On format specifiers for (un)signed integers:
-	https://www.geeksforgeeks.org/difference-d-format-specifier-c-language/ */
+	https://utat-ss.readthedocs.io/en/master/c-programming/print-formatting.html */
 	printf("FS Info:\n");
-	printf("total_block_count=%i\n",superblock.totalBlocks);
-	printf("fat_blk_count=%i\n",superblock.fatBlocks);
-	printf("redir_blk=%i\n",superblock.rootBlockIndex);
-	printf("data_blk=%i\n",superblock.dataBlockStart);
-	printf("data_blk_count=%i\n",superblock.dataBlockCt);
-	printf("fat_free_ratio=%d/%i\n", fatFree, superblock.dataBlockCt);
-	printf("rdir_free_ratio=%d/%i\n", rdFree, FS_FILE_MAX_COUNT);
+	printf("total_block_count=%u\n",superblock.totalBlocks);
+	printf("fat_blk_count=%u\n",superblock.fatBlocks);
+	printf("redir_blk=%u\n",superblock.rootBlockIndex);
+	printf("data_blk=%u\n",superblock.dataBlockStart);
+	printf("data_blk_count=%u\n",superblock.dataBlockCt);
+	printf("fat_free_ratio=%d/%u\n", fatFree, superblock.dataBlockCt);
+	printf("rdir_free_ratio=%d/%d\n", rdFree, FS_FILE_MAX_COUNT);
 	
 
 
