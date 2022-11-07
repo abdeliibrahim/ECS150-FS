@@ -46,7 +46,7 @@ struct __attribute__((packed)) RootDir {
 
 // global Superblock, Root Directory, and FAT
  struct Superblock superblock;
- struct RootDir *rd;
+ struct RootDir rd;
  struct FAT fat;
 
 /* TODO: Phase 1 */
@@ -104,7 +104,7 @@ int fs_info(void)
 	}
 	/* Calculating rdir free files. */
 	for(i=0; i<FS_FILE_MAX_COUNT; i++) {
-		if(rd->rootDir->filename[0] == fileEmpty)
+		if(rd.rootDir[i].filename[0] == fileEmpty)
 			rdFree++;
 	}
 
