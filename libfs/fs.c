@@ -7,6 +7,7 @@
 #include "disk.h"
 #include "fs.h"
 
+#define FAT_EOC OxFFFF
 /* On packing a struct: 
 https://stackoverflow.com/questions/4306186/structure-padding-and-packing */
 
