@@ -74,21 +74,25 @@ int fs_mount(const char *diskname)
 		return -1;
 	}
 
-	
-	fat.flatArray = malloc(sizeof(uint16_t) * superblock.dataBlockCt);
+	if (block_disk_count() != superblock.totalBlocks) {
+		return -1;
+	} 
 
-	uint16_t FAT_EOC = 0xFFFF;
-	if (fat.flatArray[0] != FAT_EOC) {
+	fat.flatArray = malloc(sizeof(uint16_t) * superblock.dataBlockCt);
+	
+	/* start at 1 since signature is 0th index */
+	for(int i = 1; i <= superblock.fatBlocks; i++) {
+		if(block_read(i, &fat.flatArray[i-1]))
+			return -1;
+		
+	}
+		uint16_t FAT_EOC = 0xFFFF;
+		if (fat.flatArray[0] != FAT_EOC) {
 		return -1;
 	}
 
-	//int bIn = 1;
-	
-
-	/* start at 1 since signature is 0th index */
-	for(int i = 1; i < superblock.dataBlockCt; i++) {
-		if(block_read(i, &fat.flatArray[i]))
-			return -1;
+	if (block_read(superblock.rootBlockIndex, &rd)) {
+		return -1;
 	}
 
 //hi
@@ -102,7 +106,8 @@ int fs_mount(const char *diskname)
 int fs_umount(void)
 {
 	/* TODO: Phase 1 */
-
+if (block_disk_close	(diskname))
+		return -1;	
 	
 
 	return 0;
@@ -113,7 +118,7 @@ int fs_info(void)
 {
 	/* TODO: Phase 1 */
 
-	int i, fatFree, rdFree= 0;
+	int i = 0, fatFree = 0, rdFree =0;
 	
 	
 	/* Calculating fat free blocks */
@@ -132,9 +137,9 @@ int fs_info(void)
 	/* On format specifiers for (un)signed integers:
 	https://utat-ss.readthedocs.io/en/master/c-programming/print-formatting.html */
 	printf("FS Info:\n");
-	printf("total_block_count=%u\n",superblock.totalBlocks);
+	printf("total_blk_count=%u\n",superblock.totalBlocks);
 	printf("fat_blk_count=%u\n",superblock.fatBlocks);
-	printf("redir_blk=%u\n",superblock.rootBlockIndex);
+	printf("rdir_blk=%u\n",superblock.rootBlockIndex);
 	printf("data_blk=%u\n",superblock.dataBlockStart);
 	printf("data_blk_count=%u\n",superblock.dataBlockCt);
 	printf("fat_free_ratio=%d/%u\n", fatFree, superblock.dataBlockCt);
