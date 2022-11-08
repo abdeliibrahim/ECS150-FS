@@ -84,7 +84,7 @@ int fs_mount(const char *diskname)
 
 	/* start at 1 since signature is 0th index */
     for (int i = 1; i < superblock.dataBlockCt; i++) {
-		if (block_read(0, &fat.flatArray))
+		if (block_read(0, ))
 		return -1;
 	}
 
