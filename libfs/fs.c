@@ -91,7 +91,7 @@ int fs_mount(const char *diskname)
 			return -1;
 	}
 
-	
+//hi
 	
 	if(block_disk_close())
 		return -1;
