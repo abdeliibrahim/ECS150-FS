@@ -7,9 +7,11 @@
 #include "disk.h"
 #include "fs.h"
 
-#define FAT_EOC OxFFFF
+
 /* On packing a struct: 
 https://stackoverflow.com/questions/4306186/structure-padding-and-packing */
+
+
 
 struct __attribute__((packed)) Superblock {
 	uint8_t sig[8];
@@ -72,7 +74,19 @@ int fs_mount(const char *diskname)
 		return -1;
 	}
 
-    //Hello THis is ALi
+	
+	fat.flatArray = malloc(sizeof(uint16_t) * superblock.dataBlockCt);
+
+	uint16_t FAT_EOC = 0xFFFF;
+	if (fat.flatArray[0] != FAT_EOC) {
+		return -1;
+	}
+
+	/* start at 1 since signature is 0th index */
+    for (int i = 1; i < superblock.dataBlockCt; i++) {
+		if (block_read(0, &fat.flatArray))
+		return -1;
+	}
 
 	
 	
