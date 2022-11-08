@@ -490,7 +490,7 @@ void thread_fs_info(void *arg)
 
 	diskname = t_arg->argv[0];
 
-	if (fs_unmount(diskname))
+	if (fs_mount(diskname))
 		die("Cannot mount diskname");
 
 	fs_info();
