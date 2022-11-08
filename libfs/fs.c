@@ -82,15 +82,19 @@ int fs_mount(const char *diskname)
 		return -1;
 	}
 
+	//int bIn = 1;
+	
+
 	/* start at 1 since signature is 0th index */
-    for (int i = 1; i < superblock.dataBlockCt; i++) {
-		if (block_read(0, ))
-		return -1;
+	for(int i = 1; i < superblock.dataBlockCt; i++) {
+		if(block_read(i, &fat.flatArray[i]))
+			return -1;
 	}
 
 	
 	
-	
+	if(block_disk_close())
+		return -1;
 
 	return 0;
 }
@@ -145,6 +149,15 @@ int fs_info(void)
 int fs_create(const char *filename)
 {
 	/* TODO: Phase 2 */
+	/* Intuition:
+
+	Init superblock blocks, datablockct, fatblocks(nodes)
+
+	malloc all fat blocks
+
+	malloc all data blocks
+	
+	*/
 	return 0;
 }
 
