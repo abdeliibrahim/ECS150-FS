@@ -163,6 +163,28 @@ int fs_create(const char *filename)
 	malloc all data blocks
 	
 	*/
+	superblock = (struct Superblock*) malloc(FS_FILE_MAX_COUNT * superblock);
+    	superblock.fatBlocks = malloc();
+
+    	// amount of data block to zero?
+   	superblock.dataBlockCt = 0;
+
+
+    	//error management
+   	// how to check if the dist is mounted???
+   	if(strlen(filename) > FS_FILENAME_LEN || filename == NULL) { return -1; }
+
+
+    	// check for empty entry in the root directory
+    	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        	if(rd.rootDir[i] == 0) {
+           	 //fill it out with proper information
+        	}
+    	}
+
+
+
+    	// still needs some work
 	return 0;
 }
 
