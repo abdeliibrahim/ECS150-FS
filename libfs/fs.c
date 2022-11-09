@@ -106,7 +106,7 @@ int fs_mount(const char *diskname)
 int fs_umount(void)
 {
 	/* TODO: Phase 1 */
-if (block_disk_close	(diskname))
+
 		return -1;	
 	
 
