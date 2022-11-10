@@ -179,7 +179,7 @@ int fs_create(const char *filename)
             		return -1;
         	}
             if (rd[i].filename[0] != NULL) {
-                conter++;
+                counter++;
             }
     	}
 
