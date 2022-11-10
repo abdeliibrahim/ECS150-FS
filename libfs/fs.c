@@ -170,7 +170,7 @@ int fs_create(const char *filename)
 	
 	// check if the file already exists
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(strcmp(filename, (char*)rd[i].filename)) {
+        	if(!strcmp(filename, (char*)rd[i].filename)) {
             		return -1;
         	}
     	}
