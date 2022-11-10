@@ -95,21 +95,33 @@ int fs_mount(const char *diskname)
 		return -1;
 	}
 
-//hi
-	
-	if(block_disk_close())
-		return -1;
 
 	return 0;
 }
 
 int fs_umount(void)
 {
-	/* TODO: Phase 1 */
 
-		return -1;	
+	/* write from superblock to disk. 
+	here, we simulate saving the changes to our disk
+	 */
+	
+	if (block_write(0, &superblock))
+		
+
+	for(int i = 1; 1<= superblock.fatBlocks; i++) {
+		if(block_write(i, &fat.flatArray[i-1]))
+			return -1;
+	}
+	
+	if (block_write(superblock.rootBlockIndex, &rd))
+		return -1;
+
+		
 	
 
+	if (block_disk_close())
+		return -1;
 	return 0;
 }
 
@@ -163,11 +175,11 @@ int fs_create(const char *filename)
 	malloc all data blocks
 	
 	*/
-	superblock = (struct Superblock*) malloc(FS_FILE_MAX_COUNT * superblock);
-    	superblock.fatBlocks = malloc();
+	// superblock = (struct Superblock*) malloc(FS_FILE_MAX_COUNT * superblock);
+    // 	superblock.fatBlocks = malloc();
 
-    	// amount of data block to zero?
-   	superblock.dataBlockCt = 0;
+    // 	// amount of data block to zero?
+   	// superblock.dataBlockCt = 0;
 
 
     	//error management
@@ -177,7 +189,7 @@ int fs_create(const char *filename)
 
     	// check for empty entry in the root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd.rootDir[i] == 0) {
+        	if(rd.rootDir[i].fileSize == 0) {
            	 //fill it out with proper information
         	}
     	}
