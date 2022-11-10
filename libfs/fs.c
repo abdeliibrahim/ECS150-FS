@@ -187,7 +187,7 @@ int fs_create(const char *filename)
 	
 	// check if the file already exists
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(strcmp(rd[i].filename, filename)) {
+        	if(strcmp(filename, (char*)rd[i].filename)) {
             		return -1;
         	}
     	}
@@ -206,9 +206,9 @@ int fs_create(const char *filename)
 	 // check for empty entry in root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].fileSize == 0) {
-            		rd[i].firstBlockIn = FAT_EOC;
+                rd[i].firstBlockIn = FAT_EOC;
             		
-			*rd[i].filename = filename;
+			    rd[i].filename = filename;
        		}
    	}
 	
@@ -229,7 +229,7 @@ int fs_ls(void)
 
 	/* TODO: Phase 2 */
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i].fileSize != NULL) {
+        	if(rd[i] != NULL) {
             		printf("file name: %s", rd[i].filename);
         	}
     	}
