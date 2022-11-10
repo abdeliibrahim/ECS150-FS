@@ -105,7 +105,7 @@ int fs_umount(void)
 	/* write from superblock to disk. 
 	here, we simulate saving the changes to our disk
 	 */
-	
+
 	if (block_write(0, &superblock))
 		
 
@@ -190,6 +190,9 @@ int fs_create(const char *filename)
     	// check for empty entry in the root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd.rootDir[i].fileSize == 0) {
+				*rd.rootDir[i].filename = filename;
+				fprintf("%s\n", *rd.rootDir[i].filename);
+
            	 //fill it out with proper information
         	}
     	}
