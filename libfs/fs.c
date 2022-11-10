@@ -184,22 +184,36 @@ int fs_create(const char *filename)
 
     	//error management
    	// how to check if the dist is mounted???
-   	if(strlen(filename) > FS_FILENAME_LEN || filename == NULL) { return -1; }
-
-
-    	// check for empty entry in the root directory
+   	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL) { return -1; }
+	
+	// check if the file already exists
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd.rootDir[i].fileSize == 0) {
-				*rd.rootDir[i].filename = filename;
-				fprintf("%s\n", *rd.rootDir[i].filename);
-
-           	 //fill it out with proper information
+        	if(strcmp(rd.rootDir[i].filename) == filename) {
+            		return -1;
         	}
     	}
 
 
+    	// check for empty entry in the root directory
+//     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+//         	if(rd.rootDir[i].fileSize == 0) {
+// 				*rd.rootDir[i].filename = filename;
+// 				fprintf("%s\n", *rd.rootDir[i].filename);
 
-    	// still needs some work
+//            	 //fill it out with proper information
+//         	}
+//     	}
+	
+	 // check for empty entry in root directory
+    	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        	if(rd.rootDir[i] == NULL) {
+            		rd.rootDir[i].firstBlockIn = FAT_EOC;
+            		rd.rootDir[i].fileSize = 0;
+			*rd.rootDir[i].filename = filename;
+       		}
+   	}
+	
+	
 	return 0;
 }
 
