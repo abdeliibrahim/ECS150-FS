@@ -223,7 +223,8 @@ int fs_delete(const char *filename)
 }
 
 int fs_ls(void)
-{
+{	
+	printf("FS Ls\n");
 	/* TODO: Phase 2 */
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].fileSize != NULL) {
