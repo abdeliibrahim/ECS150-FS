@@ -175,7 +175,7 @@ int fs_create(const char *filename)
 	
 	// check if the file already exists
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(strcmp(filename, (char*)rd[i].filename)) {
+        	if(!strcmp(filename, (char*)rd[i].filename)) {
             		return -1;
         	}
             if (rd[i].filename[0] != '\0') {
@@ -191,7 +191,7 @@ int fs_create(const char *filename)
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].filename[0] != '\0') {
                 rd[i].firstBlockIn = FAT_EOC;
-                (char*)rd[i].filename = filename;
+                *rd[i].filename = filename;
                 rd[i].fileSize = 0;
        		}
    	}
@@ -244,22 +244,23 @@ int fs_open(const char *filename)
 
 	/* TODO: Phase 3 */
 
-	int fd;
+	// int fd;
 
-	// variable for checking if file was found
-	int found = -1;
-	// check if the file exists, we can use a similar loop from our create file
-    	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(strcmp(filename, (char*)rd[i].filename)) {
-            		found = 0;
-        	}
-    	}
-		if(found)
-			return -1;
+	// // variable for checking if file was found
+	// int found = -1;
+	// // check if the file exists, we can use a similar loop from our create file
+    // 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+    //     	if(strcmp(filename, (char*)rd[i].filename)) {
+    //         		found = 0;
+    //     	}
+    // 	}
+	// 	if(found)
+	// 		return -1;
 		
-	int fd[32];
+	// int fd[32];
 
-	return fd;
+	// return fd;
+	return 0;
 }
 
 int fs_close(int fd)
