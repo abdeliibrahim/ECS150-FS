@@ -163,6 +163,7 @@ int fs_info(void)
 
 int fs_create(const char *filename)
 {
+	uint16_t FAT_EOC = 0xFFFF;
 	/* TODO: Phase 2 */
 	/* Intuition:
 
@@ -182,22 +183,36 @@ int fs_create(const char *filename)
 
     	//error management
    	// how to check if the dist is mounted???
-   	if(strlen(filename) > FS_FILENAME_LEN || filename == NULL) { return -1; }
-
-
-    	// check for empty entry in the root directory
+   	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL) { return -1; }
+	
+	// check if the file already exists
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i].fileSize == 0) {
-				*rd[i].filename = filename;
-				//fprintf("%s\n", *rd[i].filename);
-
-           	 //fill it out with proper information
+        	if(strcmp(rd[i].filename, filename)) {
+            		return -1;
         	}
     	}
 
 
+    	// check for empty entry in the root directory
+//     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+//         	if(rd.rootDir[i].fileSize == 0) {
+// 				*rd.rootDir[i].filename = filename;
+// 				fprintf("%s\n", *rd.rootDir[i].filename);
 
-    	// still needs some work
+//            	 //fill it out with proper information
+//         	}
+//     	}
+	
+	 // check for empty entry in root directory
+    	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        	if(rd[i].fileSize == 0) {
+            		rd[i].firstBlockIn = FAT_EOC;
+            		
+			*rd[i].filename = filename;
+       		}
+   	}
+	
+	
 	return 0;
 }
 
@@ -210,9 +225,13 @@ int fs_delete(const char *filename)
 int fs_ls(void)
 {
 	/* TODO: Phase 2 */
+	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        	if(rd[i].fileSize != NULL) {
+            		printf("file name: %s", rd[i].filename);
+        	}
+    	}
 	return 0;
 }
-
 int fs_open(const char *filename)
 {
 	/* TODO: Phase 3 */
