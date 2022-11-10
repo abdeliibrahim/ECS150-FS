@@ -191,7 +191,7 @@ int fs_create(const char *filename)
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].filename[0] != '\0') {
                 rd[i].firstBlockIn = FAT_EOC;
-                *rd[i].filename = filename;
+                strcpy(rd[i].filename, filename);
                 rd[i].fileSize = 0;
        		}
    	}
