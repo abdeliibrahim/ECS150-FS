@@ -204,14 +204,19 @@ int fs_delete(const char *filename)
 {
 	/* TODO: Phase 2 */
 
-    if(filename == NULL) {
+    // we should also check if the file is open
+    // if open, return -1
+
+    if(filename == NULL || MOUNTED == 0) {
         return -1;
     }
+
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if(*rd[i].filename == filename) {
             // file’s entry must be emptied
             // all the data blocks containing the file’s contents must be freed in the FAT
+            return 0;
         }
     }
 
