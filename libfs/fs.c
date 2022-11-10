@@ -33,7 +33,7 @@ struct __attribute__((packed)) FAT {
 
 };
 
-struct __attribute__((packed)) Entry {
+struct __attribute__((packed)) RootDir {
 	uint8_t filename[FS_FILENAME_LEN];
 	uint32_t fileSize;
 	uint16_t firstBlockIn;
@@ -42,16 +42,14 @@ struct __attribute__((packed)) Entry {
 	uint8_t padding[10];
 
 };
-struct __attribute__((packed)) RootDir {
-	struct Entry rootDir[FS_FILE_MAX_COUNT];
-};
+
+
 
 
 // global Superblock, Root Directory, and FAT
  struct Superblock superblock;
- struct RootDir rd;
  struct FAT fat;
-
+struct RootDir rd[FS_FILE_MAX_COUNT];	
 /* TODO: Phase 1 */
 
 int fs_mount(const char *diskname)
@@ -142,7 +140,7 @@ int fs_info(void)
 	for(i=0; i<FS_FILE_MAX_COUNT; i++) {
 		/* "An empty entry is defined by the first character of
 		the entry’s filename being equal to the NULL character." */
-		if(rd.rootDir[i].filename[0] == NULL)
+		if(rd[i].filename[0] == NULL)
 			rdFree++;
 	}
 
@@ -189,9 +187,9 @@ int fs_create(const char *filename)
 
     	// check for empty entry in the root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd.rootDir[i].fileSize == 0) {
-				*rd.rootDir[i].filename = filename;
-				fprintf("%s\n", *rd.rootDir[i].filename);
+        	if(rd[i].fileSize == 0) {
+				*rd[i].filename = filename;
+				//fprintf("%s\n", *rd[i].filename);
 
            	 //fill it out with proper information
         	}
