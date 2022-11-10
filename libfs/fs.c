@@ -219,16 +219,18 @@ int fs_delete(const char *filename)
 }
 
 int fs_ls(void)
+{
+    /* TODO: Phase 2 */
+    if(MOUNTED == 0) {
+        return -1;
+    }
 
-{	
 	printf("FS Ls\n");
-
-	/* TODO: Phase 2 */
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].filename[0] != NULL) {
             		printf("file: %s, size: %d, data_blk: ", rd[i].filename, rd[i].fileSize);
         	}
-    	}
+    }
 	return 0;
 }
 int fs_open(const char *filename)
