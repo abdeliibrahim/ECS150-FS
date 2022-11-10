@@ -177,9 +177,9 @@ int fs_create(const char *filename)
 	
 	 // check for empty entry in root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i] == NULL) {
+        	if(rd[i].filename == NULL) {
                 rd[i].firstBlockIn = FAT_EOC;
-			    rd[i].filename = filename;
+			    *rd[i].filename = filename;
                 rd[i].fileSize = 0;
        		}
    	}
@@ -201,7 +201,7 @@ int fs_ls(void)
 
 	/* TODO: Phase 2 */
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i] != NULL) {
+        	if(rd[i].filename != NULL) {
             		printf("file name: %s \n file size: %d", rd[i].filename, rd[i].fileSize);
         	}
     	}
