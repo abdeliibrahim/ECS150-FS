@@ -7,6 +7,7 @@
 #include "disk.h"
 #include "fs.h"
 
+int MOUNTED = 0;
 
 /* On packing a struct: 
 https://stackoverflow.com/questions/4306186/structure-padding-and-packing */
@@ -94,6 +95,7 @@ int fs_mount(const char *diskname)
 	}
 
 
+    MOUNTED = 1;
 	return 0;
 }
 
@@ -120,6 +122,8 @@ int fs_umount(void)
 
 	if (block_disk_close())
 		return -1;
+
+    MOUNTED = 0;
 	return 0;
 }
 
@@ -166,7 +170,7 @@ int fs_create(const char *filename)
 	uint16_t FAT_EOC = 0xFFFF;
 	/* TODO: Phase 2 */
 
-   	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL) { return -1; }
+   	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == 0) { return -1; }
 	
 	// check if the file already exists
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
@@ -177,10 +181,9 @@ int fs_create(const char *filename)
 	
 	 // check for empty entry in root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i].filename == NULL) {
+        	if(rd[i].fileSize == 0) {
                 rd[i].firstBlockIn = FAT_EOC;
 			    *rd[i].filename = filename;
-                rd[i].fileSize = 0;
        		}
    	}
 	
