@@ -165,24 +165,7 @@ int fs_create(const char *filename)
 {
 	uint16_t FAT_EOC = 0xFFFF;
 	/* TODO: Phase 2 */
-	/* Intuition:
 
-	Init superblock blocks, datablockct, fatblocks(nodes)
-
-	malloc all fat blocks
-
-	malloc all data blocks
-	
-	*/
-	// superblock = (struct Superblock*) malloc(FS_FILE_MAX_COUNT * superblock);
-    // 	superblock.fatBlocks = malloc();
-
-    // 	// amount of data block to zero?
-   	// superblock.dataBlockCt = 0;
-
-
-    	//error management
-   	// how to check if the dist is mounted???
    	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL) { return -1; }
 	
 	// check if the file already exists
@@ -191,17 +174,6 @@ int fs_create(const char *filename)
             		return -1;
         	}
     	}
-
-
-    	// check for empty entry in the root directory
-//     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-//         	if(rd.rootDir[i].fileSize == 0) {
-// 				*rd.rootDir[i].filename = filename;
-// 				fprintf("%s\n", *rd.rootDir[i].filename);
-
-//            	 //fill it out with proper information
-//         	}
-//     	}
 	
 	 // check for empty entry in root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
@@ -230,7 +202,7 @@ int fs_ls(void)
 	/* TODO: Phase 2 */
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i] != NULL) {
-            		printf("file name: %s", rd[i].filename);
+            		printf("file name: %s \n file size: %d", rd[i].filename, rd[i].fileSize);
         	}
     	}
 	return 0;
