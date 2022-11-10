@@ -226,6 +226,11 @@ int fs_delete(const char *filename)
 int fs_ls(void)
 {
 	/* TODO: Phase 2 */
+	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        	if(rd.rootDir[i] != NULL) {
+            		printf("file name: %s", rd.rootDir[i].filename)
+        	}
+    	}
 	return 0;
 }
 
