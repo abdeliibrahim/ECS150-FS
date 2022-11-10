@@ -169,6 +169,7 @@ int fs_create(const char *filename)
 {
 	uint16_t FAT_EOC = 0xFFFF;
 	/* TODO: Phase 2 */
+    int counter= 0;
 
    	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == 0) { return -1; }
 	
@@ -177,13 +178,21 @@ int fs_create(const char *filename)
         	if(!strcmp(filename, (char*)rd[i].filename)) {
             		return -1;
         	}
+            if (rd[i].filename[0] != NULL) {
+                conter++;
+            }
     	}
+
+        if(counter >= FS_FILE_MAX_COUNT) {
+            return -1;
+        }
 	
 	 // check for empty entry in root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i].fileSize == 0) {
+        	if(rd[i].filename[0] != NULL) {
                 rd[i].firstBlockIn = FAT_EOC;
 			    *rd[i].filename = filename;
+                rd[i].fileSize = 0;
        		}
    	}
 	
@@ -194,7 +203,19 @@ int fs_create(const char *filename)
 int fs_delete(const char *filename)
 {
 	/* TODO: Phase 2 */
-	return 0;
+
+    if(filename == NULL) {
+        return -1;
+    }
+
+    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if(*rd[i].filename == filename) {
+            // file’s entry must be emptied
+            // all the data blocks containing the file’s contents must be freed in the FAT
+        }
+    }
+
+	return -1;
 }
 
 int fs_ls(void)
@@ -204,8 +225,8 @@ int fs_ls(void)
 
 	/* TODO: Phase 2 */
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i].filename != NULL) {
-            		printf("file name: %s \n file size: %d", rd[i].filename, rd[i].fileSize);
+        	if(rd[i].filename[0] != NULL) {
+            		printf("file: %s, size: %d, data_blk: ", rd[i].filename, rd[i].fileSize);
         	}
     	}
 	return 0;
