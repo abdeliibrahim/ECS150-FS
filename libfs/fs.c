@@ -215,6 +215,7 @@ int fs_delete(const char *filename)
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if(*rd[i].filename == filename) {
             // file’s entry must be emptied
+            rd[i] = NULL;
             // all the data blocks containing the file’s contents must be freed in the FAT
             return 0;
         }
