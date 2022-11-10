@@ -209,8 +209,25 @@ int fs_ls(void)
 }
 int fs_open(const char *filename)
 {
+
 	/* TODO: Phase 3 */
-	return 0;
+
+	int fd;
+
+	// variable for checking if file was found
+	int found = -1;
+	// check if the file exists, we can use a similar loop from our create file
+    	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        	if(strcmp(filename, (char*)rd[i].filename)) {
+            		found = 0;
+        	}
+    	}
+		if(found)
+			return -1;
+		
+	int fd[32];
+
+	return fd;
 }
 
 int fs_close(int fd)
