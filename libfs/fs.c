@@ -175,10 +175,10 @@ int fs_create(const char *filename)
 	
 	// check if the file already exists
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(!strcmp(filename, (char*)rd[i].filename)) {
+        	if(strcmp(filename, (char*)rd[i].filename)) {
             		return -1;
         	}
-            if (rd[i].filename[0] != NULL) {
+            if (rd[i].filename[0] != '\0') {
                 counter++;
             }
     	}
@@ -189,7 +189,7 @@ int fs_create(const char *filename)
 	
 	 // check for empty entry in root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i].filename[0] != NULL) {
+        	if(rd[i].filename[0] != '\0') {
                 rd[i].firstBlockIn = FAT_EOC;
 			    *rd[i].filename = filename;
                 rd[i].fileSize = 0;
