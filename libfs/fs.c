@@ -205,10 +205,10 @@ int fs_create(const char *filename)
 	
 	 // check for empty entry in root directory
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i].fileSize == 0) {
+        	if(rd[i] == NULL) {
                 rd[i].firstBlockIn = FAT_EOC;
-            		
 			    rd[i].filename = filename;
+                rd[i].fileSize = 0;
        		}
    	}
 	
