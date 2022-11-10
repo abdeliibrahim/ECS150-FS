@@ -191,7 +191,7 @@ int fs_create(const char *filename)
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].filename[0] != '\0') {
                 rd[i].firstBlockIn = FAT_EOC;
-			    *rd[i].filename = filename;
+                (char*)rd[i].filename = filename;
                 rd[i].fileSize = 0;
        		}
    	}
@@ -213,9 +213,9 @@ int fs_delete(const char *filename)
 
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if(*rd[i].filename == filename) {
+        if((char*)rd[i].filename == filename) {
             // file’s entry must be emptied
-            rd[i] = NULL;
+            //rd[i] = NULL;
             // all the data blocks containing the file’s contents must be freed in the FAT
             return 0;
         }
@@ -233,7 +233,7 @@ int fs_ls(void)
 
 	printf("FS Ls\n");
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(rd[i].filename[0] != NULL) {
+        	if(rd[i].filename[0] != '\0') {
             		printf("file: %s, size: %d, data_blk: %d", rd[i].filename, rd[i].fileSize, superblock.dataBlockCt);
         	}
     }
