@@ -172,23 +172,26 @@ int fs_create(const char *filename)
     int counter= 0;
 
    	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == 0) { return -1; }
-	
-	// check if the file already exists
-    	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+
+
+       for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+            // check if the file already exists. if exist return -1, otherwise increment file count
         	if(!strcmp(filename, (char*)rd[i].filename)) {
             		return -1;
-        	}
-            if (rd[i].filename[0] != '\0') {
+        	} else (rd[i].filename[0] != '\0') {
                 counter++;
             }
     	}
 
+
+        // if the max number of file exceeds, return -1
         if(counter >= FS_FILE_MAX_COUNT) {
             return -1;
         }
 	
-	 // check for empty entry in root directory
+
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+            // check for empty entry in root directory.
         	if(rd[i].filename[0] == '\0') {
                 rd[i].firstBlockIn = FAT_EOC;
                 memcpy(rd[i].filename, filename, strlen(filename)+1);
@@ -208,13 +211,14 @@ int fs_delete(const char *filename)
         return -1;
     }
 
-
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if((char*)rd[i].filename == filename) {
             // file’s entry must be emptied
             rd[i].filename[0] = '\0';
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
+            block_write(superblock.rootBlockIndex, &rd);
+            break;
         }
     }
 
