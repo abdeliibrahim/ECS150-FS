@@ -193,20 +193,16 @@ int fs_create(const char *filename)
                 rd[i].firstBlockIn = FAT_EOC;
                 memcpy(rd[i].filename, filename, strlen(filename)+1);
                 rd[i].fileSize = 0;
-				block_write(superblock.rootBlockIndex, &rd);
+                return 0;
        		}
    	}
-	
-	
-	return 0;
 }
 
 int fs_delete(const char *filename)
 {
 	/* TODO: Phase 2 */
 
-    // we should also check if the file is open
-    // if open, return -1
+    uint16_t FAT_EOC = 0xFFFF;
 
     if(filename == NULL || MOUNTED == 0) {
         return -1;
@@ -216,13 +212,15 @@ int fs_delete(const char *filename)
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if((char*)rd[i].filename == filename) {
             // file’s entry must be emptied
-            //rd[i] = NULL;
-            // all the data blocks containing the file’s contents must be freed in the FAT
-            return 0;
+            rd[i].filename[0] = '\0';
+            rd[i].fileSize = 0;
+            rd[i].firstBlockIn = FAT_EOC;
         }
     }
 
-	return -1;
+    // all the data blocks containing the file’s contents must be freed in the FAT
+
+	return 0;
 }
 
 int fs_ls(void)
@@ -235,7 +233,7 @@ int fs_ls(void)
 	printf("FS Ls\n");
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].filename[0] != '\0') {
-            		printf("file: %s, size: %d, data_blk: %d", rd[i].filename, rd[i].fileSize, superblock.dataBlockCt);
+            		printf("file: %s, size: %d, data_blk: %d", rd[i].filename, rd[i].fileSize, rd[i].firstBlockIn);
         	}
     }
 	return 0;
