@@ -204,6 +204,7 @@ int fs_delete(const char *filename)
 	/* TODO: Phase 2 */
 
     uint16_t FAT_EOC = 0xFFFF;
+    int data_index = 0;
 
     if(filename == NULL || MOUNTED == -1) {
         return -1;
@@ -212,6 +213,7 @@ int fs_delete(const char *filename)
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if((char*)rd[i].filename == filename) {
             // file’s entry must be emptied
+            data_index = rd[i].firstBlockIn;
             rd[i].filename[0] = '\0';
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
@@ -220,7 +222,12 @@ int fs_delete(const char *filename)
         }
     }
 
-    // all the data blocks containing the file’s contents must be freed in the FAT
+    // all the data blocks containing the file’s contents must be freed in the FAT??????
+    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if(data_index != FAT_EOC) {
+            fat[data_index] = 0;
+        }
+    }
 
 	return 0;
 }
