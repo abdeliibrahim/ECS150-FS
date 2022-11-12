@@ -7,7 +7,7 @@
 #include "disk.h"
 #include "fs.h"
 
-int MOUNTED = 0;
+int MOUNTED = -1;
 
 /* On packing a struct: 
 https://stackoverflow.com/questions/4306186/structure-padding-and-packing */
@@ -95,7 +95,7 @@ int fs_mount(const char *diskname)
 	}
 
 
-    MOUNTED = 1;
+    MOUNTED = 0;
 	return 0;
 }
 
@@ -123,7 +123,7 @@ int fs_umount(void)
 	if (block_disk_close())
 		return -1;
 
-    MOUNTED = 0;
+    MOUNTED = -1;
 	return 0;
 }
 
@@ -171,7 +171,7 @@ int fs_create(const char *filename)
 	/* TODO: Phase 2 */
     int counter= 0;
 
-   	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == 0) { return -1; }
+   	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == -1) { return -1; }
 
 
        for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
@@ -183,12 +183,10 @@ int fs_create(const char *filename)
             }
     	}
 
-
         // if the max number of file exceeds, return -1
         if(counter >= FS_FILE_MAX_COUNT) {
             return -1;
         }
-	
 
     	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
             // check for empty entry in root directory.
@@ -207,7 +205,7 @@ int fs_delete(const char *filename)
 
     uint16_t FAT_EOC = 0xFFFF;
 
-    if(filename == NULL || MOUNTED == 0) {
+    if(filename == NULL || MOUNTED == -1) {
         return -1;
     }
 
@@ -230,7 +228,7 @@ int fs_delete(const char *filename)
 int fs_ls(void)
 {
     /* TODO: Phase 2 */
-    if(MOUNTED == 0) {
+    if(MOUNTED == -1) {
         return -1;
     }
 
