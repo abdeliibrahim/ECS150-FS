@@ -25,8 +25,6 @@ struct __attribute__((packed)) Superblock {
 
 	// 1 byte * 4079
 	uint8_t padding[4079];
-
-
 };
 
 struct __attribute__((packed)) FAT {
@@ -42,15 +40,11 @@ struct __attribute__((packed)) RootDir {
 
 	// 1 byte * 10
 	uint8_t padding[10];
-
 };
 
-
-
-
 // global Superblock, Root Directory, and FAT
- struct Superblock superblock;
- struct FAT fat;
+struct Superblock superblock;
+struct FAT fat;
 struct RootDir rd[FS_FILE_MAX_COUNT];	
 /* TODO: Phase 1 */
 
@@ -95,14 +89,12 @@ int fs_mount(const char *diskname)
 		return -1;
 	}
 
-
     MOUNTED = 0;
 	return 0;
 }
 
 int fs_umount(void)
 {
-
 	/* write from superblock to disk. 
 	here, we simulate saving the changes to our disk
 	 */
