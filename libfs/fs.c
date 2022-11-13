@@ -165,11 +165,12 @@ int fs_create(const char *filename)
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         // check if the file already exists. if exist return -1, otherwise increment file count
-        if(!strcmp(filename, (char*)rd[i].filename)) {
+        if(strcmp(filename, (char*)rd[i].filename) == 0) {
             return -1;
-        } else (rd[i].filename[0] != '\0');
+        }
+        if(rd[i].filename[0] != '\0') {
             counter++;
-        
+        }
     }
 
     // if the max number of file exceeds, return -1
