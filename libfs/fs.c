@@ -167,9 +167,9 @@ int fs_create(const char *filename)
         // check if the file already exists. if exist return -1, otherwise increment file count
         if(!strcmp(filename, (char*)rd[i].filename)) {
             return -1;
-        } else (rd[i].filename[0] != '\0') {
+        } else (rd[i].filename[0] != '\0');
             counter++;
-        }
+        
     }
 
     // if the max number of file exceeds, return -1
@@ -230,6 +230,12 @@ int fs_ls(void)
     }
 	return 0;
 }
+	int openCt = 0;
+	struct __attribute__((packed)) openFileContent {
+		size_t offset;
+		uint8_t filename[FILENAME_MAX];
+	};
+	struct openFileContent fd[FS_OPEN_MAX_COUNT];
 int fs_open(const char *filename)
 {
 
