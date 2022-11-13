@@ -171,29 +171,28 @@ int fs_create(const char *filename)
 
    	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == -1) { return -1; }
 
-
-       for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-            // check if the file already exists. if exist return -1, otherwise increment file count
-        	if(!strcmp(filename, (char*)rd[i].filename)) {
-            		return -1;
-        	} else (rd[i].filename[0] != '\0') {
-                counter++;
-            }
-    	}
-
-        // if the max number of file exceeds, return -1
-        if(counter >= FS_FILE_MAX_COUNT) {
+    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        // check if the file already exists. if exist return -1, otherwise increment file count
+        if(!strcmp(filename, (char*)rd[i].filename)) {
             return -1;
+        } else (rd[i].filename[0] != '\0') {
+            counter++;
         }
+    }
 
-    	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-            // check for empty entry in root directory.
-        	if(rd[i].filename[0] == '\0') {
-                rd[i].firstBlockIn = FAT_EOC;
-                memcpy(rd[i].filename, filename, strlen(filename)+1);
-                rd[i].fileSize = 0;
-                return 0;
-       		}
+    // if the max number of file exceeds, return -1
+    if(counter >= FS_FILE_MAX_COUNT) {
+        return -1;
+    }
+
+    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        // check for empty entry in root directory.
+        if(rd[i].filename[0] == '\0') {
+            rd[i].firstBlockIn = FAT_EOC;
+            memcpy(rd[i].filename, filename, strlen(filename)+1);
+            rd[i].fileSize = 0;
+            return 0;
+        }
    	}
 }
 
@@ -284,8 +283,6 @@ int fs_stat(int fd)
 //    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
 //
 //    }
-
-
 	return 0;
 }
 
