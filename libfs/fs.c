@@ -210,7 +210,8 @@ int fs_delete(const char *filename)
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if((char*)rd[i].filename == filename) {
-            if(data_index != -1) {
+            // all the data blocks containing the file’s contents must be freed in the FAT??????
+            if(data_index == -1) {
                 data_index = rd[i].firstBlockIn;
             }
             // file’s entry must be emptied
@@ -218,11 +219,6 @@ int fs_delete(const char *filename)
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
             block_write(superblock.rootBlockIndex, &rd);
-        }
-
-        // all the data blocks containing the file’s contents must be freed in the FAT??????
-        if (data_index != FAT_EOC) {
-            fat[data_index] = 0;
         }
     }
 	return 0;
