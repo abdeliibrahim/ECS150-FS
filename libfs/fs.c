@@ -235,7 +235,10 @@ int fs_ls(void)
 		size_t offset;
 		uint8_t filename[FILENAME_MAX];
 	};
-	struct openFileContent fd[FS_OPEN_MAX_COUNT];
+	
+	//create fd table
+	struct openFileContent fdir[FS_OPEN_MAX_COUNT];
+	
 int fs_open(const char *filename)
 {
 
@@ -286,13 +289,16 @@ int fs_stat(int fd)
 
 int fs_lseek(int fd, size_t offset)
 {
-	/* TODO: Phase 3 */
+	// to do: check if fd is valid
+	fdir[fd].offset = offset;
 	return 0;
 }
 
 int fs_write(int fd, void *buf, size_t count)
 {
 	/* TODO: Phase 4 */
+
+	fdir[fd].offset++;
 	return 0;
 }
 
@@ -304,6 +310,7 @@ int fs_read(int fd, void *buf, size_t count)
 
 
 	/* TODO: Phase 4 */
+	fdir[fd].offset++;
 	return 0;
 }
 
