@@ -182,7 +182,7 @@ int fs_create(const char *filename)
         // check for empty entry in root directory.
         if(rd[i].filename[0] == '\0') {
             rd[i].firstBlockIn = FAT_EOC;
-            memcpy(rd[i].filename, filename, strlen(filename)+1);
+            memcpy(rd[i].filename, filename, FS_FILENAME_LEN);
             rd[i].fileSize = 0;
             return 0;
         }
