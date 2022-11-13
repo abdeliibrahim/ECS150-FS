@@ -247,8 +247,11 @@ int fs_open(const char *filename)
 	// check if file exists in root directory; we can use a similar loop from our create file
 	int fExists = -1;
 	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(!strcmp(filename, (char*)rd[i].filename)) {
+		
+        	if(!strcmp((char*)rd[i].filename, filename)) {
             		fExists = 0;
+					printf("EXISTS %d\n", fExists);
+					break;
         	}
     	}
 	// VALIDATION
@@ -256,7 +259,7 @@ int fs_open(const char *filename)
 		return -1;
 
 	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
-		if (fdir[i].filename) {
+		if (strlen(fdir[i].filename) != 0) {
 			fdir[i].offset = 0;
 			// "man memcpy" command to understand how it works
 			memcpy(fdir[i].filename, filename, FS_FILENAME_LEN);
