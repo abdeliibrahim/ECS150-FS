@@ -38,6 +38,7 @@ struct __attribute__((packed)) RootDir {
 	uint8_t filename[FS_FILENAME_LEN];
 	uint32_t fileSize;
 	uint16_t firstBlockIn;
+    size_t offset;
 
 	// 1 byte * 10
 	uint8_t padding[10];
@@ -158,9 +159,6 @@ int fs_info(void)
 	printf("data_blk_count=%u\n",superblock.dataBlockCt);
 	printf("fat_free_ratio=%d/%u\n", fatFree, superblock.dataBlockCt);
 	printf("rdir_free_ratio=%d/%d\n", rdFree, FS_FILE_MAX_COUNT);
-	
-
-
 	return 0;
 
 }
@@ -204,7 +202,7 @@ int fs_delete(const char *filename)
 	/* TODO: Phase 2 */
 
     uint16_t FAT_EOC = 0xFFFF;
-    int data_index = 0;
+    int data_index = -1;
 
     if(filename == NULL || MOUNTED == -1) {
         return -1;
@@ -212,23 +210,21 @@ int fs_delete(const char *filename)
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if((char*)rd[i].filename == filename) {
+            if(data_index != -1) {
+                data_index = rd[i].firstBlockIn;
+            }
             // file’s entry must be emptied
-            data_index = rd[i].firstBlockIn;
             rd[i].filename[0] = '\0';
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
             block_write(superblock.rootBlockIndex, &rd);
-            break;
         }
-    }
 
-    // all the data blocks containing the file’s contents must be freed in the FAT??????
-    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if(data_index != FAT_EOC) {
+        // all the data blocks containing the file’s contents must be freed in the FAT??????
+        if (data_index != FAT_EOC) {
             fat[data_index] = 0;
         }
     }
-
 	return 0;
 }
 
@@ -280,6 +276,20 @@ int fs_close(int fd)
 int fs_stat(int fd)
 {
 	/* TODO: Phase 3 */
+    // Return -1 if no FS is currently mounted, or fd is out of bound
+    if(MOUNTED == -1 || fd > 32 || fd < 0) {
+        return -1;
+    }
+
+    // size of the file
+    int f_size = -1;
+
+    //find the size of the open file
+//    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+//
+//    }
+
+
 	return 0;
 }
 
