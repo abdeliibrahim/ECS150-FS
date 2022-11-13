@@ -233,34 +233,42 @@ int fs_ls(void)
 	int openCt = 0;
 	struct __attribute__((packed)) openFileContent {
 		size_t offset;
-		uint8_t filename[FILENAME_MAX];
+		uint8_t filename[FS_FILENAME_LEN];
+		
 	};
+
 	
 	//create fd table
 	struct openFileContent fdir[FS_OPEN_MAX_COUNT];
 	
+	
 int fs_open(const char *filename)
 {
+	// check if file exists in root directory; we can use a similar loop from our create file
+	int fExists = -1;
+	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
+        	if(!strcmp(filename, (char*)rd[i].filename)) {
+            		fExists = 0;
+        	}
+    	}
+	// VALIDATION
+	if (MOUNTED == -1 || strlen(filename) > FS_FILENAME_LEN || filename == NULL || openCt == FS_OPEN_MAX_COUNT || fExists)
+		return -1;
 
-	/* TODO: Phase 3 */
+	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
+		if (fdir[i].filename) {
+			fdir[i].offset = 0;
+			// "man memcpy" command to understand how it works
+			memcpy(fdir[i].filename, filename, FS_FILENAME_LEN);
+			return i;
+		}
+			
+	}
 
-	// int fd;
-
-	// // variable for checking if file was found
-	// int found = -1;
-	// // check if the file exists, we can use a similar loop from our create file
-    // 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-    //     	if(strcmp(filename, (char*)rd[i].filename)) {
-    //         		found = 0;
-    //     	}
-    // 	}
-	// 	if(found)
-	// 		return -1;
-		
-	// int fd[32];
-
-	// return fd;
-	return 0;
+	
+	
+	
+	return -1;
 }
 
 int fs_close(int fd)
