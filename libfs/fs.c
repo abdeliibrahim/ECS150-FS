@@ -273,6 +273,12 @@ int fs_open(const char *filename)
 
 int fs_close(int fd)
 {
+	if (fdir[fd].filename[0] == '\0' || MOUNTED == -1 || fd > 31 || fd < 0)
+		return -1;
+	fdir[fd].filename[0] = '\0';
+	fdir[fd].offset = 0;
+
+	openCt--;
 	/* TODO: Phase 3 */
 	return 0;
 }
