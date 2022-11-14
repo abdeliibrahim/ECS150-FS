@@ -296,11 +296,9 @@ int fs_stat(int fd)
         return -1;
     }
 
-    uint8_t* fileName = fdir[fd]->filename;
-
     //find the size of the open file
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if(strcmp((char*)fileName, (char*)rd[i].filename) == 0) {
+        if(strcmp((char*)fdir[fd]->filename, (char*)rd[i].filename) == 0) {
             return rd[i].fileSize;
         }
     }
