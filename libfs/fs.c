@@ -36,7 +36,6 @@ struct __attribute__((packed)) RootDir {
 	uint8_t filename[FS_FILENAME_LEN];
 	uint32_t fileSize;
 	uint16_t firstBlockIn;
-    size_t offset;
 
 	// 1 byte * 10
 	uint8_t padding[10];
@@ -215,11 +214,9 @@ int fs_delete(const char *filename)
                 fat[data_index] = 0;
                 data_index += 1;
             }
+            break;
         }
     }
-
-
-
 	return 0;
 }
 
@@ -297,12 +294,13 @@ int fs_stat(int fd)
     }
 
     // size of the file
-    int f_size = -1;
+    uint32_t file_size = 0;
+
 
     //find the size of the open file
-//    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-//
-//    }
+    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if()
+    }
 	return 0;
 }
 
