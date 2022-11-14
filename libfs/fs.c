@@ -202,22 +202,21 @@ int fs_delete(const char *filename)
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if((char*)rd[i].filename == filename) {
-            // get the first block index
+            // get the first data block index
             data_index = rd[i].firstBlockIn;
             // file’s entry must be emptied
             rd[i].filename[0] = '\0';
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
-            block_write(superblock.rootBlockIndex, &rd);
             // all the data blocks containing the file’s contents must be freed in the FAT??????
-            while (fat.flatArray[data_index] != FAT_EOC) {
-                fat.flatArray[data_index] = 0;
+            while (fat[data_index] != FAT_EOC) {
+                fat[data_index] = 0;
                 data_index += 1;
             }
-            break;
+            return 0;
         }
     }
-	return 0;
+    return -1;
 }
 
 int fs_ls(void)
@@ -295,20 +294,20 @@ int fs_close(int fd)
 int fs_stat(int fd)
 {
 	/* TODO: Phase 3 */
-    // Return -1 if no FS is currently mounted, or fd is out of bound
-    if(MOUNTED == -1 || fd > 32 || fd < 0) {
+    // Return -1 if no FS is currently mounted, or fd is out of bound, or it is not currently open
+    if(MOUNTED == -1 || fd > 32 || fd < 0 || fdir[fd]->filename[0] == '\0') {
         return -1;
     }
 
-    // size of the file
-    uint32_t file_size = 0;
-
+    uint8_t* fileName = fdir[fd]->filename;
 
     //find the size of the open file
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if()
+        if(strcmp((char*)fileName, (char*)rd[i].filename) == 0) {
+            return rd[i].fileSize;
+        }
     }
-	return 0;
+	return -1;
 }
 
 int fs_lseek(int fd, size_t offset)
