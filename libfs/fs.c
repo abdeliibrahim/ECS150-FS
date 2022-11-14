@@ -201,7 +201,7 @@ int fs_delete(const char *filename)
     }
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if((char*)rd[i].filename == filename) {
+        if(strcmp((char*)rd[i].filename, filename) == 0) {
             // get the first data block index
             data_index = rd[i].firstBlockIn;
             // file’s entry must be emptied
