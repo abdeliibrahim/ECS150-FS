@@ -320,7 +320,6 @@ int fs_lseek(int fd, size_t offset)
         }
     }
 
-
 	fdir[fd].offset = offset;
 	return 0;
 }
