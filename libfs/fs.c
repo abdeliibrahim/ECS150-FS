@@ -226,7 +226,7 @@ int fs_ls(void)
         return -1;
     }
 
-	printf("FS Ls\n");
+	printf("FS Ls:\n");
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].filename[0] != '\0') {
             		printf("file: %s, size: %d, data_blk: %d\n", rd[i].filename, rd[i].fileSize, rd[i].firstBlockIn);
