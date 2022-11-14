@@ -36,7 +36,6 @@ struct __attribute__((packed)) RootDir {
 	uint8_t filename[FS_FILENAME_LEN];
 	uint32_t fileSize;
 	uint16_t firstBlockIn;
-    size_t offset;
 
 	// 1 byte * 10
 	uint8_t padding[10];
@@ -163,13 +162,15 @@ int fs_create(const char *filename)
 
    	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == -1) { return -1; }
 
+    // check if the file exits and count number of existed files
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         // check if the file already exists. if exist return -1, otherwise increment file count
-        if(!strcmp(filename, (char*)rd[i].filename)) {
+        if(strcmp(filename, (char*)rd[i].filename) == 0) {
             return -1;
-        } else (rd[i].filename[0] != '\0');
+        }
+        if(rd[i].filename[0] != '\0') {
             counter++;
-        
+        }
     }
 
     // if the max number of file exceeds, return -1
@@ -181,7 +182,7 @@ int fs_create(const char *filename)
         // check for empty entry in root directory.
         if(rd[i].filename[0] == '\0') {
             rd[i].firstBlockIn = FAT_EOC;
-            memcpy(rd[i].filename, filename, strlen(filename)+1);
+            memcpy(rd[i].filename, filename, FS_FILENAME_LEN);
             rd[i].fileSize = 0;
             return 0;
         }
@@ -193,7 +194,7 @@ int fs_delete(const char *filename)
 	/* TODO: Phase 2 */
 
     uint16_t FAT_EOC = 0xFFFF;
-    int data_index = -1;
+    uint16_t data_index = 0xFFFF;
 
     if(filename == NULL || MOUNTED == -1) {
         return -1;
@@ -201,15 +202,19 @@ int fs_delete(const char *filename)
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if((char*)rd[i].filename == filename) {
-            // all the data blocks containing the file’s contents must be freed in the FAT??????
-            if(data_index == -1) {
-                data_index = rd[i].firstBlockIn;
-            }
+            // get the first block index
+            data_index = rd[i].firstBlockIn;
             // file’s entry must be emptied
             rd[i].filename[0] = '\0';
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
             block_write(superblock.rootBlockIndex, &rd);
+            // all the data blocks containing the file’s contents must be freed in the FAT??????
+            while (fat[data_index] != FAT_EOC) {
+                fat[data_index] = 0;
+                data_index += 1;
+            }
+            break;
         }
     }
 	return 0;
@@ -247,8 +252,11 @@ int fs_open(const char *filename)
 	// check if file exists in root directory; we can use a similar loop from our create file
 	int fExists = -1;
 	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
-        	if(!strcmp(filename, (char*)rd[i].filename)) {
+		
+        	if(!strcmp((char*)rd[i].filename, filename)) {
             		fExists = 0;
+					printf("EXISTS %d\n", fExists);
+					break;
         	}
     	}
 	// VALIDATION
@@ -256,7 +264,7 @@ int fs_open(const char *filename)
 		return -1;
 
 	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
-		if (fdir[i].filename) {
+		if (strlen(fdir[i].filename) != 0) {
 			fdir[i].offset = 0;
 			// "man memcpy" command to understand how it works
 			memcpy(fdir[i].filename, filename, FS_FILENAME_LEN);
@@ -292,12 +300,13 @@ int fs_stat(int fd)
     }
 
     // size of the file
-    int f_size = -1;
+    uint32_t file_size = 0;
+
 
     //find the size of the open file
-//    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-//
-//    }
+    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if()
+    }
 	return 0;
 }
 
