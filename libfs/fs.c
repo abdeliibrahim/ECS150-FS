@@ -230,7 +230,7 @@ int fs_ls(void)
 	printf("FS Ls\n");
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         	if(rd[i].filename[0] != '\0') {
-            		printf("file: %s, size: %d, data_blk: %d", rd[i].filename, rd[i].fileSize, rd[i].firstBlockIn);
+            		printf("file: %s, size: %d, data_blk: %d\n", rd[i].filename, rd[i].fileSize, rd[i].firstBlockIn);
         	}
     }
 	return 0;
@@ -264,7 +264,7 @@ int fs_open(const char *filename)
 		return -1;
 
 	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
-		if (strlen(fdir[i].filename) != 0) {
+		if (fdir[i].filename[0] == '\0') {
 			fdir[i].offset = 0;
 			// "man memcpy" command to understand how it works
 			memcpy(fdir[i].filename, filename, FS_FILENAME_LEN);
