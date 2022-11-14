@@ -163,6 +163,7 @@ int fs_create(const char *filename)
 
    	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == -1) { return -1; }
 
+    // check if the file exits and count number of existed files
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         // check if the file already exists. if exist return -1, otherwise increment file count
         if(strcmp(filename, (char*)rd[i].filename) == 0) {
@@ -194,7 +195,7 @@ int fs_delete(const char *filename)
 	/* TODO: Phase 2 */
 
     uint16_t FAT_EOC = 0xFFFF;
-    int data_index = -1;
+    uint16_t data_index = 0xFFFF;
 
     if(filename == NULL || MOUNTED == -1) {
         return -1;
@@ -202,17 +203,23 @@ int fs_delete(const char *filename)
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if((char*)rd[i].filename == filename) {
-            // all the data blocks containing the file’s contents must be freed in the FAT??????
-            if(data_index == -1) {
-                data_index = rd[i].firstBlockIn;
-            }
+            // get the first block index
+            data_index = rd[i].firstBlockIn;
             // file’s entry must be emptied
             rd[i].filename[0] = '\0';
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
             block_write(superblock.rootBlockIndex, &rd);
+            // all the data blocks containing the file’s contents must be freed in the FAT??????
+            while (fat[data_index] != FAT_EOC) {
+                fat[data_index] = 0;
+                data_index += 1;
+            }
         }
     }
+
+
+
 	return 0;
 }
 
