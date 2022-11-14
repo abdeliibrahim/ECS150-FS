@@ -57,10 +57,9 @@ int fs_mount(const char *diskname)
 	if (block_disk_open(diskname))
 		return -1;
 
-	superblock = malloc(sizeof(struct Superblock));
-	memeset(superblock, 0, BLOCK_SIZE);
-	fat = malloc(sizeof(struct FAT));
-	memeset(fat, 0, BLOCK_SIZE);
+	superblock = malloc(BLOCK_SIZE);
+	fat = malloc(BLOCK_SIZE);
+
 
 	/* read 0th block from the @disk to the superblock,
 	return -1 if errors */
@@ -78,7 +77,7 @@ int fs_mount(const char *diskname)
 		return -1;
 	} 
 
-	fat->flatArray = malloc(sizeof(uint16_t) * superblock->dataBlockCt);
+	fat->flatArray = malloc(BLOCK_SIZE * superblock->fatBlocks);
 	
 	/* start at 1 since signature is 0th index */
 	for(int i = 1; i <= superblock->fatBlocks; i++) {
