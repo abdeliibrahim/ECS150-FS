@@ -268,6 +268,7 @@ int fs_open(const char *filename)
 			fdir[i].offset = 0;
 			// "man memcpy" command to understand how it works
 			memcpy(fdir[i].filename, filename, FS_FILENAME_LEN);
+			openCt++;
 			return i;
 		}
 			
