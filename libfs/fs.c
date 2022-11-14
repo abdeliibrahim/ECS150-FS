@@ -292,13 +292,13 @@ int fs_stat(int fd)
 {
 	/* TODO: Phase 3 */
     // Return -1 if no FS is currently mounted, or fd is out of bound, or it is not currently open
-    if(MOUNTED == -1 || fd > 32 || fd < 0 || fdir[fd]->filename[0] == '\0') {
+    if(MOUNTED == -1 || fd > 32 || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
     //find the size of the open file
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if(strcmp((char*)fdir[fd]->filename, (char*)rd[i].filename) == 0) {
+        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0) {
             return rd[i].fileSize;
         }
     }
@@ -308,12 +308,12 @@ int fs_stat(int fd)
 int fs_lseek(int fd, size_t offset)
 {
 	// to do: check if fd is valid
-    if(MOUNTED == -1 || fd > 32 || fd < 0 || fdir[fd]->filename[0] == '\0') {
+    if(MOUNTED == -1 || fd > 32 || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if(strcmp((char*)fdir[fd]->filename, (char*)rd[i].filename) == 0){
+        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
             if(rd[i].fileSize < offset) {
                 return -1;
             }
