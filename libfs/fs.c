@@ -311,10 +311,9 @@ int fs_lseek(int fd, size_t offset)
     if(MOUNTED == -1 || fd > 32 || fd < 0 || fdir[fd]->filename[0] == '\0') {
         return -1;
     }
-    uint8_t* fileName = fdir[fd]->filename;
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if(strcmp((char*)fileName, (char*)rd[i].filename) == 0){
+        if(strcmp((char*)fdir[fd]->filename, (char*)rd[i].filename) == 0){
             if(rd[i].fileSize < offset) {
                 return -1;
             }
