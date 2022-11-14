@@ -209,8 +209,8 @@ int fs_delete(const char *filename)
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
             // all the data blocks containing the file’s contents must be freed in the FAT??????
-            while (fat[data_index] != FAT_EOC) {
-                fat[data_index] = 0;
+            while (fat.flatArray[data_index] != FAT_EOC) {
+                fat.flatArray[data_index] = 0;
                 data_index += 1;
             }
             return 0;
