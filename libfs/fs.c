@@ -199,24 +199,44 @@ int fs_delete(const char *filename)
 	/* TODO: Phase 2 */
 
     uint16_t FAT_EOC = 0xFFFF;
-    uint16_t data_index = 0xFFFF;
+    uint16_t starting_data_index = 0xFFFF;
+    int block_num = 0;
 
     if(filename == NULL || MOUNTED == -1) {
         return -1;
     }
 
+    // get number of blocks
+    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+
+        if(rd[i].filename[0] != '\0') {
+            block_num++;
+        }
+    }
+
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if(strcmp((char*)rd[i].filename, filename) == 0) {
-            // get the first data block index
-            data_index = rd[i].firstBlockIn;
             // file’s entry must be emptied
+            starting_data_index = rd[i].firstBlockIn;
             rd[i].filename[0] = '\0';
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
             // all the data blocks containing the file’s contents must be freed in the FAT??????
+            for(int i = starting_data_index; i < block_num; i = starting_data_index) {
+                uint16_t next = fat->flatArray[i]
+                if(fat->flatArray[i] != 0xFFFF) {
+                    fat->flatArray[i] = 0;
+                }
+
+                if (fat->flatArray[i] == 0xFFFF) { break;}
+                starting_data_index = next;
+
+            }
             return 0;
         }
     }
+
+
     return -1;
 }
 
