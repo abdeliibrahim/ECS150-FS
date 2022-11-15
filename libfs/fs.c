@@ -208,7 +208,6 @@ int fs_delete(const char *filename)
 
     // get number of blocks
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-
         if(rd[i].filename[0] != '\0') {
             block_num++;
         }
@@ -222,7 +221,7 @@ int fs_delete(const char *filename)
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
             // all the data blocks containing the file’s contents must be freed in the FAT??????
-            for(int i = starting_data_index; i < block_num; i = starting_data_index) {
+            for(int i = starting_data_index; i < sizeof(fat->flatArray) ; i = starting_data_index) {
                 uint16_t next = fat->flatArray[i]
                 if(fat->flatArray[i] != 0xFFFF) {
                     fat->flatArray[i] = 0;
