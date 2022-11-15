@@ -29,37 +29,38 @@ struct __attribute__((packed)) Superblock {
 
 struct __attribute__((packed)) FAT {
 	uint16_t *flatArray;
-
 };
 
 struct __attribute__((packed)) RootDir {
 	uint8_t filename[FS_FILENAME_LEN];
 	uint32_t fileSize;
 	uint16_t firstBlockIn;
-
 	// 1 byte * 10
 	uint8_t padding[10];
 };
 
+struct __attribute__((packed)) openFileContent {
+    size_t offset;
+    uint8_t filename[FS_FILENAME_LEN];
+};
+
+int openCt = 0;
+//create fd table
+struct openFileContent fdir[FS_OPEN_MAX_COUNT];
 // global Superblock, Root Directory, and FAT
 struct Superblock *superblock;
 struct FAT *fat;
-struct RootDir rd[FS_FILE_MAX_COUNT];	
-/* TODO: Phase 1 */
+struct RootDir rd[FS_FILE_MAX_COUNT];
 
 int fs_mount(const char *diskname)
 {
 	/* TODO: Phase 1 */
-	
-	
-	
 	// open disk, return -1 if open errors
 	if (block_disk_open(diskname))
 		return -1;
 
 	superblock = malloc(BLOCK_SIZE);
 	fat = malloc(BLOCK_SIZE);
-
 
 	/* read 0th block from the @disk to the superblock,
 	return -1 if errors */
@@ -93,7 +94,6 @@ int fs_mount(const char *diskname)
 	if (block_read(superblock->rootBlockIndex, &rd)) {
 		return -1;
 	}
-
     MOUNTED = 0;
 	return 0;
 }
@@ -115,8 +115,6 @@ int fs_umount(void)
 	if (block_write(superblock->rootBlockIndex, &rd))
 		return -1;
 
-		
-	
 
 	if (block_disk_close())
 		return -1;
@@ -193,6 +191,7 @@ int fs_create(const char *filename)
             return 0;
         }
    	}
+    return -1;
 }
 
 int fs_delete(const char *filename)
@@ -215,10 +214,6 @@ int fs_delete(const char *filename)
             rd[i].fileSize = 0;
             rd[i].firstBlockIn = FAT_EOC;
             // all the data blocks containing the file’s contents must be freed in the FAT??????
-            while (fat->flatArray[data_index] != FAT_EOC) {
-                fat->flatArray[data_index] = 0;
-                data_index += 1;
-            }
             return 0;
         }
     }
@@ -240,16 +235,7 @@ int fs_ls(void)
     }
 	return 0;
 }
-	int openCt = 0;
-	struct __attribute__((packed)) openFileContent {
-		size_t offset;
-		uint8_t filename[FS_FILENAME_LEN];
-		
-	};
 
-	
-	//create fd table
-	struct openFileContent fdir[FS_OPEN_MAX_COUNT];
 	
 	
 int fs_open(const char *filename)
@@ -298,26 +284,29 @@ int fs_stat(int fd)
 {
 	/* TODO: Phase 3 */
     // Return -1 if no FS is currently mounted, or fd is out of bound, or it is not currently open
-    if(MOUNTED == -1 || fd > 32 || fd < 0 || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd >= 32 || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
-    //find the size of the open file
+    //first find the open file in the root directory, then, return the size of the open file
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0) {
             return rd[i].fileSize;
         }
     }
+
+    //if file not found, return -1
 	return -1;
 }
 
 int fs_lseek(int fd, size_t offset)
 {
 	// to do: check if fd is valid
-    if(MOUNTED == -1 || fd > 32 || fd < 0 || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd >= 32 || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
+    //check if the offset is bigger than the file size
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
             if(rd[i].fileSize < offset) {
@@ -326,6 +315,7 @@ int fs_lseek(int fd, size_t offset)
         }
     }
 
+    // set the offset
 	fdir[fd].offset = offset;
 	return 0;
 }
