@@ -8,6 +8,7 @@
 #include "fs.h"
 
 int MOUNTED = -1;
+int FILE_COUNT = 0;
 
 /* On packing a struct: 
 https://stackoverflow.com/questions/4306186/structure-padding-and-packing */
@@ -160,26 +161,19 @@ int fs_info(void)
 
 int fs_create(const char *filename)
 {
-	uint16_t FAT_EOC = 0xFFFF;
 	/* TODO: Phase 2 */
-    int counter= 0;
+    uint16_t FAT_EOC = 0xFFFF;
 
-   	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == -1) { return -1; }
+   	if(strlen(filename) >= FS_FILENAME_LEN || filename == NULL || MOUNTED == -1 || FILE_COUNT >= FS_FILE_MAX_COUNT) {
+        return -1;
+    }
 
     // check if the file exits and count number of existed files
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        // check if the file already exists. if exist return -1, otherwise increment file count
+        // check if the file already exists. if exist return -1
         if(strcmp(filename, (char*)rd[i].filename) == 0) {
             return -1;
         }
-        if(rd[i].filename[0] != '\0') {
-            counter++;
-        }
-    }
-
-    // if the max number of file exceeds, return -1
-    if(counter >= FS_FILE_MAX_COUNT) {
-        return -1;
     }
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
@@ -188,6 +182,7 @@ int fs_create(const char *filename)
             rd[i].firstBlockIn = FAT_EOC;
             memcpy(rd[i].filename, filename, FS_FILENAME_LEN);
             rd[i].fileSize = 0;
+            FILE_COUNT++;
             return 0;
         }
    	}
