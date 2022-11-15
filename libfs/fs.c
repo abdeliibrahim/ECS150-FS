@@ -230,7 +230,6 @@ int fs_delete(const char *filename)
 
                 if (fat->flatArray[i] == 0xFFFF) { break;}
                 starting_data_index = next;
-
             }
             return 0;
         }
