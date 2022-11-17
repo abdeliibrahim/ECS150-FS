@@ -219,8 +219,8 @@ int fs_delete(const char *filename)
             rd[i].firstBlockIn = FAT_EOC;
             FILE_COUNT--;
             // all the data blocks containing the file’s contents must be freed in the FAT??????
-            for(int i = starting_data_index; i < sizeof(*fat->flatArray)/sizeof(*fat->flatArray[0]) - 1; i = starting_data_index) {
-                uint16_t next = fat->flatArray[i]
+            for(int i = starting_data_index; i < sizeof(*fat->flatArray)/sizeof(fat->flatArray[0]) - 1; i = starting_data_index) {
+                uint16_t next = fat->flatArray[i];
                 if(fat->flatArray[i] != 0xFFFF) {
                     fat->flatArray[i] = 0;
                 }
@@ -335,6 +335,17 @@ int fs_lseek(int fd, size_t offset)
     // set the offset
 	fdir[fd].offset = offset;
 	return 0;
+}
+
+// helper function to find first index of data block corresponding to file's offset
+int dbFind(int fd, size_t offset) {
+	int dbIndex;
+	 for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
+            return rd[i].firstBlockIn + offset;
+		}
+	 }
+	
 }
 
 int fs_write(int fd, void *buf, size_t count)
