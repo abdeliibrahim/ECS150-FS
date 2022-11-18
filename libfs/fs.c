@@ -49,8 +49,8 @@ int openCt = 0;
 //create fd table
 struct openFileContent fdir[FS_OPEN_MAX_COUNT];
 // global Superblock, Root Directory, and FAT
-struct Superblock *superblock;
-struct FAT *fat;
+struct Superblock superblock;
+struct FAT fat;
 struct RootDir rd[FS_FILE_MAX_COUNT];
 
 int fs_mount(const char *diskname)
@@ -60,8 +60,8 @@ int fs_mount(const char *diskname)
 	if (block_disk_open(diskname))
 		return -1;
 
-	superblock = malloc(BLOCK_SIZE);
-	fat = malloc(BLOCK_SIZE);
+
+	
 
 	/* read 0th block from the @disk to the superblock,
 	return -1 if errors */
@@ -70,33 +70,33 @@ int fs_mount(const char *diskname)
 
 	/* now that the first block is in the superblock,
 	check if the signature is correct */
-	if (strcmp("ECS150FS", superblock->sig) == -1) {
-		fprintf(stderr, "Signature not accepted");
+	if (strcmp("ECS150FS", superblock.sig) == -1) {
+		//fprintf(stderr, "Signature not accepted");
 		return -1;
 	}
 
-	if (block_disk_count() != superblock->totalBlocks) {
+	if (block_disk_count() != superblock.totalBlocks) {
 		return -1;
 	} 
 
-	fat->flatArray = malloc(BLOCK_SIZE * superblock->fatBlocks);
+	fat.flatArray = malloc(BLOCK_SIZE * superblock.fatBlocks * 2);
 	
 	/* start at 1 since signature is 0th index */
-	for(int i = 1; i <= superblock->fatBlocks; i++) {
-		if(block_read(i, &fat->flatArray[i-1]))
+	for(int i = 1; i <= superblock.fatBlocks; i++) {
+		if(block_read(i, &fat.flatArray[i-1]))
 			return -1;
 		
 	}
 		uint16_t FAT_EOC = 0xFFFF;
-		if (fat->flatArray[0] != FAT_EOC) {
+		if (fat.flatArray[0] != FAT_EOC) {
 		return -1;
 	}
 
-	if (block_read(superblock->rootBlockIndex, &rd)) {
+	if (block_read(superblock.rootBlockIndex, &rd)) {
 		return -1;
 	}
     MOUNTED = 0;
-	return 0;
+	 return 0;
 }
 
 int fs_umount(void)
@@ -108,12 +108,12 @@ int fs_umount(void)
 	if (block_write(0, &superblock))
 		
 
-	for(int i = 1; 1<= superblock->fatBlocks; i++) {
-		if(block_write(i, &fat->flatArray[i-1]))
+	for(int i = 1; 1<= superblock.fatBlocks; i++) {
+		if(block_write(i, &fat.flatArray[i-1]))
 			return -1;
 	}
 	
-	if (block_write(superblock->rootBlockIndex, &rd))
+	if (block_write(superblock.rootBlockIndex, &rd))
 		return -1;
 
 
@@ -133,8 +133,8 @@ int fs_info(void)
 	
 	
 	/* Calculating fat free blocks */
-	for(i; i<superblock->dataBlockCt; i++) {
-		if(fat->flatArray[i] == 0)
+	for(i; i<superblock.dataBlockCt; i++) {
+		if(fat.flatArray[i] == 0)
 			fatFree++;
 	}
 	/* Calculating rdir free files. */
@@ -148,12 +148,12 @@ int fs_info(void)
 	/* On format specifiers for (un)signed integers:
 	https://utat-ss.readthedocs.io/en/master/c-programming/print-formatting.html */
 	printf("FS Info:\n");
-	printf("total_blk_count=%u\n",superblock->totalBlocks);
-	printf("fat_blk_count=%u\n",superblock->fatBlocks);
-	printf("rdir_blk=%u\n",superblock->rootBlockIndex);
-	printf("data_blk=%u\n",superblock->dataBlockStart);
-	printf("data_blk_count=%u\n",superblock->dataBlockCt);
-	printf("fat_free_ratio=%d/%u\n", fatFree, superblock->dataBlockCt);
+	printf("total_blk_count=%u\n",superblock.totalBlocks);
+	printf("fat_blk_count=%u\n",superblock.fatBlocks);
+	printf("rdir_blk=%u\n",superblock.rootBlockIndex);
+	printf("data_blk=%u\n",superblock.dataBlockStart);
+	printf("data_blk_count=%u\n",superblock.dataBlockCt);
+	printf("fat_free_ratio=%d/%u\n", fatFree, superblock.dataBlockCt);
 	printf("rdir_free_ratio=%d/%d\n", rdFree, FS_FILE_MAX_COUNT);
 	return 0;
 
@@ -219,13 +219,13 @@ int fs_delete(const char *filename)
             rd[i].firstBlockIn = FAT_EOC;
             FILE_COUNT--;
             // all the data blocks containing the file’s contents must be freed in the FAT??????
-            for(int i = starting_data_index; i < sizeof(*fat->flatArray)/sizeof(fat->flatArray[0]) - 1; i = starting_data_index) {
-                uint16_t next = fat->flatArray[i];
-                if(fat->flatArray[i] != 0xFFFF) {
-                    fat->flatArray[i] = 0;
+            for(int i = starting_data_index; i < sizeof(*fat.flatArray)/sizeof(fat.flatArray[0]) - 1; i = starting_data_index) {
+                uint16_t next = fat.flatArray[i];
+                if(fat.flatArray[i] != 0xFFFF) {
+                    fat.flatArray[i] = 0;
                 }
 
-                if (fat->flatArray[i] == 0xFFFF) { break;}
+                if (fat.flatArray[i] == 0xFFFF) { break;}
                 starting_data_index = next;
             }
             FILE_COUNT--;

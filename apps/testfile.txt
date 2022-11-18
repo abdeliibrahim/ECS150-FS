@@ -1,6 +1,5 @@
 MOUNT
 CREATE	test3file.txt
-CREATE	test2file.txt
-OPEN	test2file.txt
-OPEN	test3file.txt
-OPEN	test3file.txt
+DELETE	test3file.txt
+UMOUNT
+
