@@ -361,13 +361,27 @@ int fs_read(int fd, void *buf, size_t count)
 	if (MOUNTED == -1 || fd > 31 || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
 		return -1;
 	}
-	int bytes;
+
+	int bytes = 0;
+
+	// find file
+	 for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
+            uint16_t firstIn = rd[i].firstBlockIn;
+		}
+	 }
 
 	void *buffer = (void*)malloc(BLOCK_SIZE);
+	block_read(dbFind(fd, fdir[fd].offset), buffer);
+	
+	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
 
+		bytes++;
+		fdir[fd].offset++;
+	}
 
-	/* TODO: Phase 4 */
-	fdir[fd].offset++;
-	return 0;
+	
+	
+	return bytes;
 }
 
