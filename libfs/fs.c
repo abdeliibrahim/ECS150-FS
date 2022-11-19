@@ -357,10 +357,13 @@ int fs_write(int fd, void *buf, size_t count)
 }
 
 int fs_read(int fd, void *buf, size_t count)
-{
-	//struct Superblock obj;
-	//block_read(fd, sizeof(obj));
-	//slide 15 project disc
+{	
+	if (MOUNTED == -1 || fd > 31 || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
+		return -1;
+	}
+	int bytes;
+
+	void *buffer = malloc(BLOCK_SIZE);
 
 
 	/* TODO: Phase 4 */
