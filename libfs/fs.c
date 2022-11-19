@@ -409,7 +409,7 @@ int fs_read(int fd, void *buf, size_t count)
 			bounceOffset = 0;
 		}
 		// copy 1 byte from our bounced buffer with respect to its offset to buf at byte i
-		memcpy(buf+i, bounce + bounceOffset, 1);
+		memcpy(&buf[i], bounce + bounceOffset, 1);
 		bytes++;
 		fdir[fd].offset++;
 		bounceOffset++;
