@@ -378,7 +378,11 @@ int fs_read(int fd, void *buf, size_t count)
 
 	assuming that we read over the data block size, we need to continue reading from
 	the next data block until we complete our count.
-
+ 
+ 	memcpy(void *restrict dst, const void *restrict src, size_t n);
+     The memcpy() function copies n bytes from memory area src to memory area dst.  If dst and src overlap, behavior is undefined.
+     Applications in which dst and src might overlap should use memmove(3) instead.
+	 
 
 	*/
 	if (MOUNTED == -1 || fd > 31 || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
@@ -387,17 +391,6 @@ int fs_read(int fd, void *buf, size_t count)
 
 	int bytes = 0;
 
-	// find file
-	 for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
-            uint16_t firstIn = rd[i].firstBlockIn;
-		}
-	 }
-	/* |   |   |   |   |   |
-	    |   |
-
-	  */ 
-
 	//start by reading first datablock
 	void *bounce = (void*)malloc(BLOCK_SIZE);
 	if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
@@ -405,10 +398,7 @@ int fs_read(int fd, void *buf, size_t count)
 	
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
-	/*  memcpy(void *restrict dst, const void *restrict src, size_t n);
-     The memcpy() function copies n bytes from memory area src to memory area dst.  If dst and src overlap, behavior is undefined.
-     Applications in which dst and src might overlap should use memmove(3) instead.
-	 */
+	
 	for(int i = 0; i < count; i++) {
 
 		if (bounceOffset > BLOCK_SIZE) {
