@@ -389,13 +389,13 @@ int fs_read(int fd, void *buf, size_t count)
 		return -1;
 	}
 
-	int bytes = 0;
+	//int bytes = 0;
 
 	//start by reading first datablock
 	void *bounce = (void*)malloc(BLOCK_SIZE);
-	if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
-		return -1;
-	
+	//if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
+	//	return -1;
+	memcpy(bounce, dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, BLOCK_SIZE);
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
 	memcpy(buf + BLOCK_SIZE, dbFind(fd, fdir[fd].offset), BLOCK_SIZE);
@@ -429,6 +429,6 @@ int fs_read(int fd, void *buf, size_t count)
 	// }
 	
 	
-	return count;
+	return 0;
 }
 
