@@ -1,5 +1,3 @@
 MOUNT
 CREATE	test3file.txt
-DELETE	test3file.txt
-UMOUNT
 

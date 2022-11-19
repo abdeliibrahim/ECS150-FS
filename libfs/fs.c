@@ -263,7 +263,7 @@ int fs_open(const char *filename)
 		
         	if(!strcmp((char*)rd[i].filename, filename)) {
             		fExists = 0;
-					printf("EXISTS %d\n", fExists);
+					//printf("EXISTS %d\n", fExists);
 					break;
         	}
     	}
