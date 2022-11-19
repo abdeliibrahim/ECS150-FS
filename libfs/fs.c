@@ -349,13 +349,13 @@ int dbFind(int fd, size_t offset) {
 }
 
 // find index of next data block
-int nextIn(int fd, size_t offset) {
+int nextDB(int fd, size_t offset) {
 	uint16_t FAT_EOC = 0xFFFF;
 	int nextIn = dbFind(fd, offset);
 	if (nextIn == FAT_EOC)
 		return -1;
 
-	return nextIn;
+	return nextDB;
 }
 
 int fs_write(int fd, void *buf, size_t count)
@@ -410,6 +410,15 @@ int fs_read(int fd, void *buf, size_t count)
      Applications in which dst and src might overlap should use memmove(3) instead.
 	 */
 	for(int i = 0; i < count; i++) {
+
+		if (bounceOffset > BLOCK_SIZE) {
+			bounceOffset = 0;
+			int nextDBlock = (nextDB(fd, fdir[fd].offset));
+			if (nextDBlock == -1)
+				return bytes;
+			block_read(nextDB + superblock.dataBlockStart, bounce);
+
+		}
 		// copy 1 byte from our bounced buffer with respect to its offset to buf at byte i
 		memcpy(buf+i, bounce + bounceOffset, 1);
 		bytes++;
