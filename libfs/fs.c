@@ -398,27 +398,37 @@ int fs_read(int fd, void *buf, size_t count)
 	
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
-	
-	for(int i = 0; i < count; i++) {
+	memcpy(buf + BLOCK_SIZE, dbFind(fd, fdir[fd].offset), BLOCK_SIZE);
 
-		if (bounceOffset > BLOCK_SIZE) {
-			int nextDBlock = (nextDB(fd, fdir[fd].offset));
-			if (nextDBlock == -1)
-				return bytes;
-			block_read(nextDB + superblock.dataBlockStart, bounce);
-			bounceOffset = 0;
-		}
-		// copy 1 byte from our bounced buffer with respect to its offset to buf at byte i
-		memcpy(buf+i, bounce + bounceOffset, 1);
-		bytes++;
-		fdir[fd].offset++;
-		bounceOffset++;
-		if (fdir[fd].offset >= fs_stat(fd))
-			return bytes;
+	// if (bounceOffset < BLOCK_SIZE) {
+	// 		int nextDBlock = (nextDB(fd, fdir[fd].offset));
+	// 		if (nextDBlock == -1)
+	// 			return bytes;
+	// 		block_read(nextDB + superblock.dataBlockStart, bounce);
+	// 		bounceOffset = 0;
+	// 	}
 
-	}
+
+	// for(int i = 0; i < count; i++) {
+
+	// 	if (bounceOffset > BLOCK_SIZE) {
+	// 		int nextDBlock = (nextDB(fd, fdir[fd].offset));
+	// 		if (nextDBlock == -1)
+	// 			return bytes;
+	// 		block_read(nextDB + superblock.dataBlockStart, bounce);
+	// 		bounceOffset = 0;
+	// 	}
+	// 	// copy 1 byte from our bounced buffer with respect to its offset to buf at byte i
+	// 	memcpy(buf+i, bounce + bounceOffset, 1);
+	// 	bytes++;
+	// 	fdir[fd].offset++;
+	// 	bounceOffset++;
+	// 	if (fdir[fd].offset >= fs_stat(fd))
+	// 		return bytes;
+
+	// }
 	
 	
-	return bytes;
+	return count;
 }
 
