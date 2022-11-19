@@ -348,6 +348,16 @@ int dbFind(int fd, size_t offset) {
 	
 }
 
+// find index of next data block
+int nextIn(int fd, size_t offset) {
+	uint16_t FAT_EOC = 0xFFFF;
+	int nextIn = dbFind(fd, offset);
+	if (nextIn == FAT_EOC)
+		return -1;
+
+	return nextIn;
+}
+
 int fs_write(int fd, void *buf, size_t count)
 {
 	/* TODO: Phase 4 */
@@ -356,16 +366,21 @@ int fs_write(int fd, void *buf, size_t count)
 	return 0;
 }
 
-int overSize(int fd, size_t offset) {
-	uint16_t FAT_EOC = 0xFFFF;
-	int nextIn = dbFind(fd, offset);
-	if (nextIn == FAT_EOC)
-		return -1;
 
-	return nextIn;
-}
 int fs_read(int fd, void *buf, size_t count)
 {	
+		/* 
+	first, we need to read our data block into a bounced buffer. 
+
+	assuming a file's offset is at value X, we need to also adjust the bounced
+	buffer's offset so that we copy our bounce to buf with the correct offset.
+	the offset would be = fileOffset % BLOCK_SIZE
+
+	assuming that we read over the data block size, we need to continue reading from
+	the next data block until we complete our count.
+
+
+	*/
 	if (MOUNTED == -1 || fd > 31 || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
 		return -1;
 	}
@@ -378,24 +393,31 @@ int fs_read(int fd, void *buf, size_t count)
             uint16_t firstIn = rd[i].firstBlockIn;
 		}
 	 }
+	/* |   |   |   |   |   |
+	    |   |
 
-	void *buffer = (void*)malloc(BLOCK_SIZE);
-	block_read(dbFind(fd, fdir[fd].offset), buffer);
+	  */ 
+
+	//start by reading first datablock
+	void *bounce = (void*)malloc(BLOCK_SIZE);
+	if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
+		return -1;
 	
+	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
+
 	/*  memcpy(void *restrict dst, const void *restrict src, size_t n);
      The memcpy() function copies n bytes from memory area src to memory area dst.  If dst and src overlap, behavior is undefined.
      Applications in which dst and src might overlap should use memmove(3) instead.
 	 */
-	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
-
-		//if blo
-
-		memccpy(buf+i, buffer + /* a bounced offset value */, 1);
+	for(int i = 0; i < count; i++) {
+		// copy 1 byte from our bounced buffer with respect to its offset to buf at byte i
+		memcpy(buf+i, bounce + bounceOffset, 1);
 		bytes++;
 		fdir[fd].offset++;
+		if (fdir[fd].offset >= fs_stat(fd))
+			return bytes;
 
 	}
-
 	
 	
 	return bytes;
