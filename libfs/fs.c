@@ -356,6 +356,14 @@ int fs_write(int fd, void *buf, size_t count)
 	return 0;
 }
 
+int overSize(int fd, size_t offset) {
+	uint16_t FAT_EOC = 0xFFFF;
+	int nextIn = dbFind(fd, offset);
+	if (nextIn == FAT_EOC)
+		return -1;
+
+	return nextIn;
+}
 int fs_read(int fd, void *buf, size_t count)
 {	
 	if (MOUNTED == -1 || fd > 31 || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
@@ -374,10 +382,18 @@ int fs_read(int fd, void *buf, size_t count)
 	void *buffer = (void*)malloc(BLOCK_SIZE);
 	block_read(dbFind(fd, fdir[fd].offset), buffer);
 	
+	/*  memcpy(void *restrict dst, const void *restrict src, size_t n);
+     The memcpy() function copies n bytes from memory area src to memory area dst.  If dst and src overlap, behavior is undefined.
+     Applications in which dst and src might overlap should use memmove(3) instead.
+	 */
 	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
 
+		//if blo
+
+		memccpy(buf+i, buffer + /* a bounced offset value */, 1);
 		bytes++;
 		fdir[fd].offset++;
+
 	}
 
 	
