@@ -363,7 +363,7 @@ int fs_read(int fd, void *buf, size_t count)
 	}
 	int bytes;
 
-	void *buffer = malloc(BLOCK_SIZE);
+	void *buffer = (void*)malloc(BLOCK_SIZE);
 
 
 	/* TODO: Phase 4 */
