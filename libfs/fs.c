@@ -405,8 +405,9 @@ int fs_read(int fd, void *buf, size_t count)
 			int nextDBlock = (nextDB(fd, fdir[fd].offset));
 			if (nextDBlock == -1)
 				return bytes;
-			block_read(nextDB + superblock.dataBlockStart, bounce);
+			//block_read((size_t)(nextDB + superblock.dataBlockStart), bounce);
 			bounceOffset = 0;
+			bounce++;
 		}
 		// copy 1 byte from our bounced buffer with respect to its offset to buf at byte i
 		memcpy(&buf[i], bounce + bounceOffset, 1);
