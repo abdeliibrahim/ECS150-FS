@@ -352,9 +352,15 @@ int fs_write(int fd, void *buf, size_t count)
 	/* TODO: Phase 4 */
 
     //Return: -1 if no FS is currently mounted, or if file descriptor @fd is
-    // * invalid (out of bounds or not currently open), or if @buf is NULL.
+    //invalid (out of bounds or not currently open), or if @buf is NULL.
     if(MOUNTED == -1 || fd >= 32 || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
         return -1;
+    }
+
+    int bytes = 0;
+
+    for(int i = 0; i < count; i++) {
+        //
     }
 
 	fdir[fd].offset++;
