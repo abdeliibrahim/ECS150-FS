@@ -338,6 +338,21 @@ int dbFind(int fd, size_t offset) {
 	
 }
 
+// helper function that returns the index of first empty block in the fat array
+uint16_t first_empty_block(){
+    uint16_t FAT_EOC = 0xFFFF;
+    for(uint16_t i = starting_data_index; i < sizeof(*fat.flatArray)/sizeof(fat.flatArray[0]) - 1; i++) {
+        // first available block in fat
+        if(fat.flatArray[i] == 0) {
+            fat.flatArray[i] = 0xFFFF;
+            return i;
+        }
+    }
+
+    //if not, return null
+    return 0xFFFF;
+}
+
 
 
 int fs_write(int fd, void *buf, size_t count)
@@ -346,7 +361,7 @@ int fs_write(int fd, void *buf, size_t count)
 
     //Return: -1 if no FS is currently mounted, or if file descriptor @fd is
     //invalid (out of bounds or not currently open), or if @buf is NULL.
-    if(MOUNTED == -1 || fd > FS_FILE_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd >= 32 || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
@@ -354,19 +369,22 @@ int fs_write(int fd, void *buf, size_t count)
     int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
     int bytes = 0;
+    int dataBlockIndex = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
 
     for(int i = 0; i < count; i++) {
+        if(fs_stat(fd) <= fdir[fd].offset) {
+            rd[i].fileSize++;
+        }
         memcpy(bounce + bounceOffset, &buf[i], 1);
         fdir[fd].offset++;
         bytes++;
         bounceOffset++;
 
-        if(fs_stat(fd) <= fdir[fd].offset) {
-            rd[i].fileSize++;
-        }
-        if(block_write((size_t)(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart), bounce)) {
+        if(block_write((size_t)dataBlockIndex, bounce)) {
             return -1;
         }
+
+//        dataBlockIndex = fat.flatArray[dataBlockIndex];
     }
 
     return bytes;
