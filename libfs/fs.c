@@ -353,6 +353,7 @@ int fs_write(int fd, void *buf, size_t count)
     int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
     int bytes = 0;
+    int dataBlockIndex = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
 
     for(int i = 0; i < count; i++) {
         memcpy(bounce + bounceOffset, &buf[i], 1);
@@ -363,7 +364,9 @@ int fs_write(int fd, void *buf, size_t count)
         if(fs_stat(fd) <= fdir[fd].offset) {
             rd[i].fileSize++;
         }
-        if(block_write((size_t)dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce)) {
+
+        dataBlockIndex = fat.flatArray[dataBlockIndex];
+        if(block_write((size_t)dataBlockIndex, bounce)) {
             return -1;
         }
     }
