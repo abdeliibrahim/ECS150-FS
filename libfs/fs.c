@@ -341,7 +341,7 @@ int dbFind(int fd, size_t offset) {
 
 int fs_write(int fd, void *buf, size_t count)
 {
-	/* TODO: Phase 4 */
+    /* TODO: Phase 4 */
 
     //Return: -1 if no FS is currently mounted, or if file descriptor @fd is
     //invalid (out of bounds or not currently open), or if @buf is NULL.
@@ -349,14 +349,27 @@ int fs_write(int fd, void *buf, size_t count)
         return -1;
     }
 
+    void *bounce_buffer = (void*)malloc(BLOCK_SIZE);
+    int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
+
     int bytes = 0;
 
     for(int i = 0; i < count; i++) {
-        //
+        memcpy(bounce_buffer + bounceOffset, &buf[i], 1);
+        fdir[fd].offset++;
+        bytes++;
+        bounceOffset++;
+
+        if(fs_stat(fd) <= fdir[fd].offset) {
+            rd[i].fileSize++;
+        }
     }
 
-	fdir[fd].offset++;
-	return 0;
+    if(block_write(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce)) {
+        return -1;
+    }
+
+    return bytes;
 }
 
 
@@ -418,8 +431,6 @@ int fs_read(int fd, void *buf, size_t count)
 			return bytes;
 		fdir[fd].offset++;
 		bounceOffset++;
-		
-			
 
 	}
 	
