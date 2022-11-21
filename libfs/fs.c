@@ -337,15 +337,7 @@ int dbFind(int fd, size_t offset) {
 	
 }
 
-// find index of next data block
-int nextDB(int fd, size_t offset) {
-	uint16_t FAT_EOC = 0xFFFF;
-	int nextIn = dbFind(fd, offset);
-	if (nextIn == FAT_EOC)
-		return -1;
 
-	return nextDB;
-}
 
 int fs_write(int fd, void *buf, size_t count)
 {
@@ -386,6 +378,18 @@ int fs_read(int fd, void *buf, size_t count)
 	 
 
 	*/
+
+	/*
+	block size 16 bytes
+	read 20 bytes
+	file offset is at 50
+
+	[16] [16] [16] [16]
+	50 % 16
+
+
+	
+	*/
 	if (MOUNTED == -1 || fd > 31 || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
 		return -1;
 	}
@@ -396,27 +400,26 @@ int fs_read(int fd, void *buf, size_t count)
 	void *bounce = (void*)malloc(BLOCK_SIZE);
 	if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
 		return -1;
-	
+	int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
 	
 	for(int i = 0; i < count; i++) {
-
-		if (bounceOffset > BLOCK_SIZE) {
-			int nextDBlock = (nextDB(fd, fdir[fd].offset));
-			if (nextDBlock == -1)
-				return bytes;
-			//block_read((size_t)(nextDB + superblock.dataBlockStart), bounce);
+		if (bounceOffset >= BLOCK_SIZE) {
+			//next data block
+			tempDB++;
+			block_read((size_t)(tempDB), bounce);
 			bounceOffset = 0;
-			bounce++;
-		}
-		// copy 1 byte from our bounced buffer with respect to its offset to buf at byte i
+			
+		   }
 		memcpy(&buf[i], bounce + bounceOffset, 1);
 		bytes++;
-		fdir[fd].offset++;
-		bounceOffset++;
 		if (fdir[fd].offset >= fs_stat(fd))
 			return bytes;
+		fdir[fd].offset++;
+		bounceOffset++;
+		
+			
 
 	}
 	

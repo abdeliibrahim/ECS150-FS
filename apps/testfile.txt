@@ -1,4 +1,2 @@
 MOUNT
-CREATE	test3file.txt
-OPEN	test3file.txt
-READ	5	test3file.txt	00000
+SEEK	5
