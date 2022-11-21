@@ -177,6 +177,7 @@ int fs_create(const char *filename)
 
     for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         // check for empty entry in root directory.
+		// https://www.tutorialandexample.com/null-character-in-c null characters
         if(rd[i].filename[0] == '\0') {
             rd[i].firstBlockIn = FAT_EOC;
             memcpy(rd[i].filename, filename, FS_FILENAME_LEN);
