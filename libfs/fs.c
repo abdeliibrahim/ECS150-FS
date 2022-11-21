@@ -382,7 +382,7 @@ int fs_write(int fd, void *buf, size_t count)
             return -1;
         }
 
-        dataBlockIndex = fat.flatArray[dataBlockIndex];
+//        dataBlockIndex = fat.flatArray[dataBlockIndex];
     }
 
     return bytes;
