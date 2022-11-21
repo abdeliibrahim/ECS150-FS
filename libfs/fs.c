@@ -362,25 +362,24 @@ int fs_write(int fd, void *buf, size_t count)
     int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
     int i = 0;
     while (i < count || fdir[fd].offset > fs_stat(fd)) {
-        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
-            int rem = fs_stat(fd) - i;
-            memcpy(&buf[i], &bounce[bounceOffset], rem);
-            fdir[fd].offset++;
-            bounceOffset++;
-            return i+rem;
-        }
+//        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
+//            int rem = fs_stat(fd) - i;
+//            memcpy(&buf[i], &bounce[bounceOffset], rem);
+//            fdir[fd].offset++;
+//            bounceOffset++;
+//            return i+rem;
+//        }
 
-        memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
+        memcpy(&bounce[bounceOffset], &buf[i], BLOCK_SIZE-bounceOffset); // |          |           |           |
         fdir[fd].offset += BLOCK_SIZE-bounceOffset;
 
         tempDB++;
-        block_read((size_t)(tempDB), bounce);
+        block_write((size_t)(tempDB), bounce);
         bounceOffset = 0;
 
         i+= BLOCK_SIZE-bounceOffset;
 
     }
-
 
     return i;
 }
