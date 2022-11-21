@@ -363,10 +363,9 @@ int fs_write(int fd, void *buf, size_t count)
         if(fs_stat(fd) <= fdir[fd].offset) {
             rd[i].fileSize++;
         }
-    }
-
-    if(block_write(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce)) {
-        return -1;
+        if(block_write(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce)) {
+            return -1;
+        }
     }
 
     return bytes;
