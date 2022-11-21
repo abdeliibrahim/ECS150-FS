@@ -312,6 +312,14 @@ int fs_lseek(int fd, size_t offset)
         return -1;
     }
 
+    //check if the offset is bigger than the file size
+    for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
+            if(rd[i].fileSize < offset) {
+                return -1;
+            }
+        }
+    }
 
 
     // set the offset
