@@ -337,6 +337,10 @@ int dbFind(int fd, size_t offset) {
 	
 }
 
+// helper function that returns the index of first empty block in the fat array
+int first_empty_block(){
+
+}
 
 
 int fs_write(int fd, void *buf, size_t count)
@@ -365,10 +369,12 @@ int fs_write(int fd, void *buf, size_t count)
             rd[i].fileSize++;
         }
 
-        dataBlockIndex = fat.flatArray[dataBlockIndex];
+
         if(block_write((size_t)dataBlockIndex, bounce)) {
             return -1;
         }
+
+        dataBlockIndex = fat.flatArray[dataBlockIndex];
     }
 
     return bytes;
