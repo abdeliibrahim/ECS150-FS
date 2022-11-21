@@ -349,13 +349,13 @@ int fs_write(int fd, void *buf, size_t count)
         return -1;
     }
 
-    void *bounce_buffer = (void*)malloc(BLOCK_SIZE);
+    void *bounce = (void*)malloc(BLOCK_SIZE);
     int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
     int bytes = 0;
 
     for(int i = 0; i < count; i++) {
-        memcpy(bounce_buffer + bounceOffset, &buf[i], 1);
+        memcpy(bounce + bounceOffset, &buf[i], 1);
         fdir[fd].offset++;
         bytes++;
         bounceOffset++;
