@@ -370,15 +370,13 @@ int fs_write(int fd, void *buf, size_t count)
     int dataBlockIndex = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
 
     for(int i = 0; i < count; i++) {
+        if(fs_stat(fd) <= fdir[fd].offset) {
+            rd[i].fileSize++;
+        }
         memcpy(bounce + bounceOffset, &buf[i], 1);
         fdir[fd].offset++;
         bytes++;
         bounceOffset++;
-
-        if(fs_stat(fd) <= fdir[fd].offset) {
-            rd[i].fileSize++;
-        }
-
 
         if(block_write((size_t)dataBlockIndex, bounce)) {
             return -1;
