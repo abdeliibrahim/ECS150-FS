@@ -362,9 +362,6 @@ int fs_write(int fd, void *buf, size_t count)
 
     void *bounce_buffer = (void*)malloc(BLOCK_SIZE);
     int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
-    int file_size = 0;
-
-
 
     int bytes = 0;
 
@@ -383,7 +380,7 @@ int fs_write(int fd, void *buf, size_t count)
         return -1;
     }
 
-	return 0;
+	return bytes;
 }
 
 
