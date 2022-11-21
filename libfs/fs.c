@@ -409,13 +409,6 @@ int fs_read(int fd, void *buf, size_t count)
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 	int i = 0;
 	while (i < count || fdir[fd].offset > fs_stat(fd)) {
-	if (bounceOffset >= BLOCK_SIZE) {
-			//next data block
-			tempDB++;
-			block_read((size_t)(tempDB), bounce);
-			bounceOffset = 0;
-			
-		  }
 	if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
 		int rem = fs_stat(fd) - i;
 		memcpy(&buf[i], &bounce[bounceOffset], rem);
@@ -425,8 +418,11 @@ int fs_read(int fd, void *buf, size_t count)
 	}
 
 	memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
-	fdir[fd].offset++;
-	bounceOffset++;
+	fdir[fd].offset += BLOCK_SIZE-bounceOffset;
+	
+	tempDB++;
+	block_read((size_t)(tempDB), bounce);
+	bounceOffset = 0;
 	
 	i+= BLOCK_SIZE-bounceOffset;
 	
