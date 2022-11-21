@@ -290,7 +290,7 @@ int fs_stat(int fd)
 {
 	/* TODO: Phase 3 */
     // Return -1 if no FS is currently mounted, or fd is out of bound, or it is not currently open
-    if(MOUNTED == -1 || fd > FS_FILE_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
@@ -308,7 +308,7 @@ int fs_stat(int fd)
 int fs_lseek(int fd, size_t offset)
 {
 	// to do: check if fd is valid
-    if(MOUNTED == -1 || fd > FS_FILE_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0' || fs_stat(fd) < offset) {
         return -1;
     }
 
@@ -338,7 +338,7 @@ int fs_write(int fd, void *buf, size_t count)
 
     //Return: -1 if no FS is currently mounted, or if file descriptor @fd is
     //invalid (out of bounds or not currently open), or if @buf is NULL.
-    if(MOUNTED == -1 || fd > FS_FILE_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
