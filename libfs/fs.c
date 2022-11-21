@@ -399,7 +399,7 @@ int fs_read(int fd, void *buf, size_t count)
 		return -1;
 	}
 
-	int bytes = 0;
+	//int bytes = 0;
 
 	//start by reading first datablock
 	void *bounce = (void*)malloc(BLOCK_SIZE);
@@ -407,26 +407,32 @@ int fs_read(int fd, void *buf, size_t count)
 		return -1;
 	int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
-
-	
-	for(int i = 0; i < count; i++) {
-		if (bounceOffset >= BLOCK_SIZE) {
+	int i = 0;
+	while (i < count || fdir[fd].offset > fs_stat(fd)) {
+	if (bounceOffset >= BLOCK_SIZE) {
 			//next data block
 			tempDB++;
 			block_read((size_t)(tempDB), bounce);
 			bounceOffset = 0;
 			
 		  }
-		memcpy(&buf[i], &bounce[bounceOffset], 1);
-		bytes++;
-		if (fdir[fd].offset >= fs_stat(fd))
-			return bytes;
+	if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
+		int rem = fs_stat(fd) - i;
+		memcpy(&buf[i], &bounce[bounceOffset], rem);
 		fdir[fd].offset++;
 		bounceOffset++;
-
+		return i+rem;
 	}
+
+	memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
+	fdir[fd].offset++;
+	bounceOffset++;
 	
+	i+= BLOCK_SIZE-bounceOffset;
 	
-	return bytes;
+	}
+
+	
+	return i;
 }
 
