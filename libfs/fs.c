@@ -351,30 +351,38 @@ int fs_write(int fd, void *buf, size_t count)
 
     //Return: -1 if no FS is currently mounted, or if file descriptor @fd is
     //invalid (out of bounds or not currently open), or if @buf is NULL.
-    if(MOUNTED == -1 || fd > FS_FILE_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
     void *bounce = (void*)malloc(BLOCK_SIZE);
+
+
+    int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
     int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
-
-    int bytes = 0;
-
-    for(int i = 0; i < count; i++) {
-        memcpy(bounce + bounceOffset, &buf[i], 1);
-        fdir[fd].offset++;
-        bytes++;
-        bounceOffset++;
-
-        if(fs_stat(fd) <= fdir[fd].offset) {
-            rd[i].fileSize++;
+    int i = 0;
+    while (i < count || fdir[fd].offset > fs_stat(fd)) {
+        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
+            int rem = fs_stat(fd) - i;
+            memcpy(&buf[i], &bounce[bounceOffset], rem);
+            fdir[fd].offset++;
+            bounceOffset++;
+            return i+rem;
         }
-        if(block_write((size_t)(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart), bounce)) {
-            return -1;
-        }
+
+        memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
+        fdir[fd].offset += BLOCK_SIZE-bounceOffset;
+
+        tempDB++;
+        block_read((size_t)(tempDB), bounce);
+        bounceOffset = 0;
+
+        i+= BLOCK_SIZE-bounceOffset;
+
     }
 
-    return bytes;
+
+    return i;
 }
 
 
@@ -408,7 +416,7 @@ int fs_read(int fd, void *buf, size_t count)
 
 	
 	*/
-	if (MOUNTED == -1 || fd > FS_FILE_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
+	if (MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
 		return -1;
 	}
 
@@ -422,23 +430,23 @@ int fs_read(int fd, void *buf, size_t count)
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 	int i = 0;
 	while (i < count || fdir[fd].offset > fs_stat(fd)) {
-	if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
-		int rem = fs_stat(fd) - i;
-		memcpy(&buf[i], &bounce[bounceOffset], rem);
-		fdir[fd].offset++;
-		bounceOffset++;
-		return i+rem;
-	}
+        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
+            int rem = fs_stat(fd) - i;
+            memcpy(&buf[i], &bounce[bounceOffset], rem);
+            fdir[fd].offset++;
+            bounceOffset++;
+            return i+rem;
+        }
 
-	memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
-	fdir[fd].offset += BLOCK_SIZE-bounceOffset;
-	
-	tempDB++;
-	block_read((size_t)(tempDB), bounce);
-	bounceOffset = 0;
-	
-	i+= BLOCK_SIZE-bounceOffset;
-	
+        memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
+        fdir[fd].offset += BLOCK_SIZE-bounceOffset;
+
+        tempDB++;
+        block_read((size_t)(tempDB), bounce);
+        bounceOffset = 0;
+
+        i+= BLOCK_SIZE-bounceOffset;
+
 	}
 
 	
