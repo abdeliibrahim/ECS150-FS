@@ -1,9 +1,3 @@
 MOUNT
-INFO
-CREATE	file_fs
-OPEN	file_fs
-SEEK	1
-STAT    1   0
-CLOSE
-DELETE	file_fs
-UMOUNT
+OPEN	test2file.txt
+SEEK	5

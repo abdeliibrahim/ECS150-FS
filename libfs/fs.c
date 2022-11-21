@@ -45,7 +45,6 @@ struct __attribute__((packed)) openFileContent {
     uint8_t filename[FS_FILENAME_LEN];
 };
 
-int openCt = 0;
 //create fd table
 struct openFileContent fdir[FS_OPEN_MAX_COUNT];
 // global Superblock, Root Directory, and FAT
@@ -257,7 +256,7 @@ int fs_open(const char *filename)
         	}
     	}
 	// VALIDATION
-	if (MOUNTED == -1 || strlen(filename) > FS_FILENAME_LEN || filename == NULL || openCt == FS_OPEN_MAX_COUNT || fExists)
+	if (MOUNTED == -1 || strlen(filename) > FS_FILENAME_LEN || filename == NULL || fExists)
 		return -1;
 
 	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
@@ -265,7 +264,7 @@ int fs_open(const char *filename)
 			fdir[i].offset = 0;
 			// "man memcpy" command to understand how it works
 			memcpy(fdir[i].filename, filename, FS_FILENAME_LEN);
-			openCt++;
+		
 			return i;
 		}
 			
@@ -281,7 +280,7 @@ int fs_close(int fd)
 	fdir[fd].filename[0] = '\0';
 	fdir[fd].offset = 0;
 
-	openCt--;
+	
 	/* TODO: Phase 3 */
 	return 0;
 }
@@ -416,8 +415,8 @@ int fs_read(int fd, void *buf, size_t count)
 			block_read((size_t)(tempDB), bounce);
 			bounceOffset = 0;
 			
-		   }
-		memcpy(&buf[i], bounce + bounceOffset, 1);
+		  }
+		memcpy(&buf[i], &bounce[bounceOffset], 1);
 		bytes++;
 		if (fdir[fd].offset >= fs_stat(fd))
 			return bytes;
