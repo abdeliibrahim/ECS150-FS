@@ -7,8 +7,6 @@
 #include "disk.h"
 #include "fs.h"
 
-int MOUNTED = -1;
-int FILE_COUNT = 0;
 
 /* On packing a struct: 
 https://stackoverflow.com/questions/4306186/structure-padding-and-packing */
@@ -45,13 +43,18 @@ struct __attribute__((packed)) openFileContent {
     uint8_t filename[FS_FILENAME_LEN];
 };
 
-int openCt = 0;
+
 //create fd table
 struct openFileContent fdir[FS_OPEN_MAX_COUNT];
 // global Superblock, Root Directory, and FAT
 struct Superblock superblock;
 struct FAT fat;
 struct RootDir rd[FS_FILE_MAX_COUNT];
+
+int openCt = 0;
+int MOUNTED = -1;
+int FILE_COUNT = 0;
+
 
 int fs_mount(const char *diskname)
 {
@@ -357,13 +360,29 @@ int fs_write(int fd, void *buf, size_t count)
         return -1;
     }
 
+    void *bounce_buffer = (void*)malloc(BLOCK_SIZE);
+    int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
+    int file_size = 0;
+
+
+
     int bytes = 0;
 
     for(int i = 0; i < count; i++) {
-        //
+        memcpy(bounce_buffer + bounceOffset, &buf[i], 1);
+        fdir[fd].offset++;
+        bytes++;
+        bounceOffset++;
+
+        if(fs_stat(fd) <= fdir[fd].offset) {
+            rd[i].fileSize++;
+        }
     }
 
-	fdir[fd].offset++;
+    if(block_write(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce)) {
+        return -1;
+    }
+
 	return 0;
 }
 
