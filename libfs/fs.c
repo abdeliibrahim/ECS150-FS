@@ -330,56 +330,45 @@ int dbFind(int fd, size_t offset) {
 	
 }
 
-// helper function that returns the index of first empty block in the fat array
-int first_empty_block(){
-    uint16_t FAT_EOC = 0xFFFF;
-    for(uint16_t i = starting_data_index; i < sizeof(*fat.flatArray)/sizeof(fat.flatArray[0]) - 1; i++) {
-        // first available block in fat
-        if(fat.flatArray[i] == 0) {
-            fat.flatArray[i] = 0xFFFF;
-            return i;
-        }
-    }
 
-    //if not, return null
-    return 0xFFFF;
-}
 
 int fs_write(int fd, void *buf, size_t count)
 {
     /* TODO: Phase 4 */
 
-    //Return: -1 if no FS is currently mounted, or if file descriptor @fd is
-    //invalid (out of bounds or not currently open), or if @buf is NULL.
-    if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
+    if (MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
         return -1;
     }
 
+    //int bytes = 0;
+
+    //start by reading first datablock
     void *bounce = (void*)malloc(BLOCK_SIZE);
-
-
+    if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
+        return -1;
     int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
     int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
     int i = 0;
-    while (i < count || fdir[fd].offset > fs_stat(fd)) {
-//        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
-//            int rem = fs_stat(fd) - i;
-//            memcpy(&buf[i], &bounce[bounceOffset], rem);
-//            fdir[fd].offset++;
-//            bounceOffset++;
-//            return i+rem;
-//        }
+    while (i < count) {
+        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
+            int rem = fs_stat(fd) - i;
+            memcpy(&buf[i], &bounce[bounceOffset], rem);
+            fdir[fd].offset++;
+            bounceOffset++;
+            return i+rem;
+        }
 
-        memcpy(&bounce[bounceOffset], &buf[i], BLOCK_SIZE-bounceOffset); // |          |           |           |
+        memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
         fdir[fd].offset += BLOCK_SIZE-bounceOffset;
 
         tempDB++;
-        block_write((size_t)(tempDB), bounce);
+        block_read((size_t)(tempDB), bounce);
         bounceOffset = 0;
 
         i+= BLOCK_SIZE-bounceOffset;
 
     }
+
 
     return i;
 }
@@ -429,22 +418,22 @@ int fs_read(int fd, void *buf, size_t count)
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 	int i = 0;
 	while (i < count) {
-	if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
-		int rem = fs_stat(fd) - i;
-		memcpy(&buf[i], &bounce[bounceOffset], rem);
-		fdir[fd].offset++;
-		bounceOffset++;
-		return i+rem;
-	}
+        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
+            int rem = fs_stat(fd) - i;
+            memcpy(&buf[i], &bounce[bounceOffset], rem);
+            fdir[fd].offset++;
+            bounceOffset++;
+            return i+rem;
+        }
 
-	memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
-	fdir[fd].offset += BLOCK_SIZE-bounceOffset;
-	
-	tempDB++;
-	block_read((size_t)(tempDB), bounce);
-	bounceOffset = 0;
-	
-	i+= BLOCK_SIZE-bounceOffset;
+        memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
+        fdir[fd].offset += BLOCK_SIZE-bounceOffset;
+
+        tempDB++;
+        block_read((size_t)(tempDB), bounce);
+        bounceOffset = 0;
+
+        i+= BLOCK_SIZE-bounceOffset;
 	
 	}
 
