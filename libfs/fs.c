@@ -335,7 +335,9 @@ int dbFind(int fd, size_t offset) {
 int fs_write(int fd, void *buf, size_t count)
 {
     /* TODO: Phase 4 */
-
+	/* what needs to be done :
+	
+	*/
     //Return: -1 if no FS is currently mounted, or if file descriptor @fd is
     //invalid (out of bounds or not currently open), or if @buf is NULL.
     if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
@@ -346,31 +348,9 @@ int fs_write(int fd, void *buf, size_t count)
 	if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
 		return -1;
 
-    int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
-    int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
-    int i = 0;
-    while (i < count) {
-//        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
-//            int rem = fs_stat(fd) - i;
-//            memcpy(&buf[i], &bounce[bounceOffset], rem);
-//            fdir[fd].offset++;
-//            bounceOffset++;
-//            return i+rem;
-//        }
+	
 
-        memcpy(&bounce[bounceOffset], &buf[i], BLOCK_SIZE-bounceOffset); // |          |           |           |
-        fdir[fd].offset += BLOCK_SIZE-bounceOffset;
 
-        tempDB++;
-        block_write((size_t)(tempDB), bounce);
-        bounceOffset = 0;
-
-        i+= BLOCK_SIZE-bounceOffset;
-		block_write((size_t)tempDB, bounce);
-		// incremennt the file size for the file in the rdir
-		// 
-
-    }
 
     return i;
 }
