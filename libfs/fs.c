@@ -330,9 +330,20 @@ int dbFind(int fd, size_t offset) {
 	
 }
 
+// helper function that returns the index of first empty block in the fat array
+int first_empty_block(){
+    uint16_t FAT_EOC = 0xFFFF;
+    for(uint16_t i = starting_data_index; i < sizeof(*fat.flatArray)/sizeof(fat.flatArray[0]) - 1; i++) {
+        // first available block in fat
+        if(fat.flatArray[i] == 0) {
+            fat.flatArray[i] = 0xFFFF;
+            return i;
+        }
+    }
 
-
-
+    //if not, return null
+    return 0xFFFF;
+}
 
 int fs_write(int fd, void *buf, size_t count)
 {
