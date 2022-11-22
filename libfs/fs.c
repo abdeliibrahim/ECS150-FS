@@ -276,7 +276,7 @@ int fs_open(const char *filename)
 
 int fs_close(int fd)
 {
-	if (fdir[fd].filename[0] == '\0' || MOUNTED == -1 || fd > FS_FILE_MAX_COUNT || fd < 0)
+	if (fdir[fd].filename[0] == '\0' || MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0)
 		return -1;
 	fdir[fd].filename[0] = '\0';
 	fdir[fd].offset = 0;
@@ -336,7 +336,10 @@ int fs_write(int fd, void *buf, size_t count)
 {
     /* TODO: Phase 4 */
 	/* what needs to be done :
-	
+		IDEAL CASE: to be written fits within a single datablock
+		- start by reading datablock to bounce buffer
+		- copy buffer to bounce+offset
+		- then write bounce to datablock
 	*/
     //Return: -1 if no FS is currently mounted, or if file descriptor @fd is
     //invalid (out of bounds or not currently open), or if @buf is NULL.
@@ -345,8 +348,23 @@ int fs_write(int fd, void *buf, size_t count)
     }
 
     void *bounce = (void*)malloc(BLOCK_SIZE);
-	if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
+	int db = fdir[fd].offset / BLOCK_SIZE;
+	if (block_read(db + superblock.dataBlockStart, bounce))
 		return -1;
+	int tempDB = db + superblock.dataBlockStart;
+	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
+
+	
+
+	int i = 0;
+	while (i < count) {
+		memcpy(&bounce[bounceOffset], &buf[i], 1);
+		block_write((size_t)tempDB, bounce);
+		fdir[fd].offset++;
+		
+		bounceOffset++;
+		i++;
+	}
 
 	
 
@@ -403,13 +421,13 @@ int fs_read(int fd, void *buf, size_t count)
 	if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
 		int rem = fs_stat(fd) - i;
 		memcpy(&buf[i], &bounce[bounceOffset], rem);
-		fdir[fd].offset++;
+		//fdir[fd].offset++;
 		bounceOffset++;
 		return i+rem;
 	}
 
 	memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
-	fdir[fd].offset += BLOCK_SIZE-bounceOffset;
+	//fdir[fd].offset += BLOCK_SIZE-bounceOffset;
 	
 	tempDB++;
 	block_read((size_t)(tempDB), bounce);
