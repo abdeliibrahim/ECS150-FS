@@ -330,20 +330,7 @@ int dbFind(int fd, size_t offset) {
 	
 }
 
-// helper function that returns the index of first empty block in the fat array
-int first_empty_block(){
-    uint16_t FAT_EOC = 0xFFFF;
-    for(uint16_t i = starting_data_index; i < sizeof(*fat.flatArray)/sizeof(fat.flatArray[0]) - 1; i++) {
-        // first available block in fat
-        if(fat.flatArray[i] == 0) {
-            fat.flatArray[i] = 0xFFFF;
-            return i;
-        }
-    }
 
-    //if not, return null
-    return 0xFFFF;
-}
 
 int fs_write(int fd, void *buf, size_t count)
 {
@@ -356,12 +343,13 @@ int fs_write(int fd, void *buf, size_t count)
     }
 
     void *bounce = (void*)malloc(BLOCK_SIZE);
-
+	if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
+		return -1;
 
     int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
     int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
     int i = 0;
-    while (i < count || fdir[fd].offset > fs_stat(fd)) {
+    while (i < count) {
 //        if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
 //            int rem = fs_stat(fd) - i;
 //            memcpy(&buf[i], &bounce[bounceOffset], rem);
@@ -378,6 +366,9 @@ int fs_write(int fd, void *buf, size_t count)
         bounceOffset = 0;
 
         i+= BLOCK_SIZE-bounceOffset;
+		block_write((size_t)tempDB, bounce);
+		// incremennt the file size for the file in the rdir
+		// 
 
     }
 
