@@ -1,0 +1,6 @@
+Make sure youre CD in apps
+
+make
+./fs_make.x disk.fs 4096
+./fs_ref.x script disk.fs testfile.txt         REFERENCE
+./test_fs.x script disk.fs testfile.txt
