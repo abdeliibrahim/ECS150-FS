@@ -436,7 +436,7 @@ int fs_write(int fd, void *buf, size_t count)
         if(bounceOffset >= BLOCK_SIZE) {
             bounceOffset = 0;
             int nextFatBlock = emptyFat();
-            if(nextFatBlock != 0xFFFF) {
+            if(nextFatBlock != -1) {
                 tempDB = nextFatBlock;
                 block_read(tempDB+superblock.dataBlockStart, bounce);
             } else {
