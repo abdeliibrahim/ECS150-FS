@@ -386,20 +386,25 @@ int fs_write(int fd, void *buf, size_t count)
 	rd[rIn].firstBlockIn = rIn;
 
 	int i = 0;
+	size_t reset = 0;
 	while (i < count) {
-		if (i >= BLOCK_SIZE) {
-			tempDB++;
-		}
+		while (reset <  BLOCK_SIZE) {
 		memcpy(&bounce[bounceOffset], &buf[i], 1);
 		
 		fdir[fd].offset++;
-		
 		bounceOffset++;
 		i++;
+		reset++;
 		rd[rIn].fileSize++;
+		
+		}
+		printf("%d\n", tempDB);
+		block_write((size_t)tempDB, bounce);
+		reset = 0;
+		tempDB++;
 	}
-	printf("%d\n", tempDB);
-	block_write((size_t)tempDB, bounce);
+	
+	
 
 	
 
