@@ -308,7 +308,7 @@ int fs_stat(int fd)
 int fs_lseek(int fd, size_t offset)
 {
 	// to do: check if fd is valid
-    if(MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0' || fs_stat(fd) < offset) {
+    if(MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
@@ -407,23 +407,34 @@ int fs_read(int fd, void *buf, size_t count)
 	if (MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
 		return -1;
 	}
-
+int rootIn;
 	//int bytes = 0;
-
+	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
+            rootIn = rd[i].firstBlockIn;
+		}
+	 }
 	//start by reading first datablock
 	void *bounce = (void*)malloc(BLOCK_SIZE);
-	if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
+	//(block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
+	if (block_read(fdir[fd].offset/BLOCK_SIZE + 1 + superblock.dataBlockStart, bounce))
 		return -1;
-	int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
+	
+	//int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
+	int tempDB = fdir[fd].offset/BLOCK_SIZE + 1 + superblock.dataBlockStart;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 	int i = 0;
+	int bytes = 0;
 	while (i < count) {
 	if (i + BLOCK_SIZE-bounceOffset > fs_stat(fd)) {
-		int rem = fs_stat(fd) - i;
-		memcpy(&buf[i], &bounce[bounceOffset], rem);
-		//fdir[fd].offset++;
-		bounceOffset++;
-		return i+rem;
+		for (int j = i; i<count; j++) {
+			memcpy(&buf[j], &bounce[bounceOffset], 1);
+			bounceOffset++;
+			bytes++;
+			i++;
+		}
+		
+		return bytes;
 	}
 
 	memcpy(&buf[i], &bounce[bounceOffset], BLOCK_SIZE-bounceOffset); // |          |           |           |
@@ -434,10 +445,10 @@ int fs_read(int fd, void *buf, size_t count)
 	bounceOffset = 0;
 	
 	i+= BLOCK_SIZE-bounceOffset;
-	
+	bytes+= BLOCK_SIZE-bounceOffset;
 	}
 
 	
-	return i;
+	return bytes;
 }
 
