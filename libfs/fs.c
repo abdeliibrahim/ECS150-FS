@@ -382,94 +382,48 @@ int fs_write(int fd, void *buf, size_t count)
 
     }
 
-    //int curFat = emptyFat(); // delete
-	
-
     void *bounce = (void*)malloc(BLOCK_SIZE);
 	int db = dbFind2(fd, fdir[fd].offset);
-	
-	//fat.flatArray[db] = curFat;
 
 	int tempDB = db + superblock.dataBlockStart;
-	//fat.flatArray[tempDB] = curFat;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
-	//rd[rIn].firstBlockIn = rIn;
-
-
 	int i = 0;
-	size_t reset = 0;
-	// int nFat = emptyFat();
     if (block_read(db + superblock.dataBlockStart, bounce))
         return -1;
 	while (i < count) {
-		//nFat = emptyFat();
-		//fat.flatArray[curFat] = nFat;
 
-
-		
-		//int tempCur = curFat;
-		//curFat = nFat;
-				while (bounceOffset <=  BLOCK_SIZE) {
+        while (bounceOffset <=  BLOCK_SIZE) {
 				
-					memcpy(&bounce[bounceOffset], &buf[i], 1);
+            memcpy(&bounce[bounceOffset], &buf[i], 1);
 					
-					fdir[fd].offset++;
-					bounceOffset++;
-					i++;
-					//reset++;
-                    if(fs_stat(fd) <= fdir[fd].offset) {
-                        rd[rIn].fileSize++;
-                    }
+            fdir[fd].offset++;
+            bounceOffset++;
+            i++;
+            //reset++;
+            if(fs_stat(fd) <= fdir[fd].offset) {
+                rd[rIn].fileSize++;
+            }
 
-                    //small operations
-					if (i >= count){
-                        block_write((size_t)tempDB, bounce);
-                        return i;
-                    }
+            //small operations
+            if (i >= count){
+                block_write((size_t)tempDB, bounce);
+                return i;
+            }
 					
-				}
+        }
 		
 		printf("%d\n", tempDB);
 		
 		block_write((size_t)tempDB, bounce);
-		// reset = 0;
-
-            bounceOffset = 0;
-            int nextFatBlock = emptyFat();
-            if(nextFatBlock != -1) {
-                tempDB = nextFatBlock;
-                block_read(tempDB+superblock.dataBlockStart, bounce);
-            }
-
-
-
-		//tempDB++;
-
-		
-		 //tempDB = fat.flatArray[tempCur] + superblock.dataBlockStart;
-		 //fat.flatArray[nFat] = 0xFFFF;
-		 //int nFat = emptyFat();
+        bounceOffset = 0;
+        int nextFatBlock = emptyFat();
+        if(nextFatBlock != -1) {
+            tempDB = nextFatBlock;
+            block_read(tempDB+superblock.dataBlockStart, bounce);
+        }
 	}
-	
-	/*
-	set fat[cur] to next available fat
-	set tempcur to cur
-	set cur to next fat
 
-	fill block with data
-	write block to disk
-	update tempDB with fat[tempcur]
-	
-	*/
-
-	
-
-
-	// for(i; i<superblock.dataBlockCt; i++) {
-	// 	if(fat.flatArray[i] == 0)
-	// 	fat.flatArray[i] = 0xFFFF;
-	// } // delete
     return i;
 }
 
