@@ -403,12 +403,8 @@ int fs_write(int fd, void *buf, size_t count)
 	while (i < count) {
 		//nFat = emptyFat();
 		//fat.flatArray[curFat] = nFat;
-        if(fs_stat(fd) <= fdir[fd].offset) {
 
-        }
-        if(bounceOffset >= BLOCK_SIZE) {
-            bounceOffset = 0;
-        }
+
 		
 		//int tempCur = curFat;
 		//curFat = nFat;
@@ -420,8 +416,9 @@ int fs_write(int fd, void *buf, size_t count)
 					bounceOffset++;
 					i++;
 					reset++;
-					rd[rIn].fileSize++;
-
+                    if(fs_stat(fd) <= fdir[fd].offset) {
+                        rd[rIn].fileSize++;
+                    }
 
 					if (i >= count)
                         return i;
@@ -431,8 +428,15 @@ int fs_write(int fd, void *buf, size_t count)
 		printf("%d\n", tempDB);
 		
 		block_write((size_t)tempDB, bounce);
-		//reset = 0;
+		reset = 0;
+        if(bounceOffset >= BLOCK_SIZE) {
+            bounceOffset = 0;
+            int nextFatBlock = emptyFat();
+            if(nextFatBlock != 0xFFFF) {
+                tempDB = nextFatBlock;
+            }
 
+        }
 
 		//tempDB++;
 
