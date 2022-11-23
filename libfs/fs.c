@@ -409,37 +409,64 @@ int fs_read(int fd, void *buf, size_t count)
 	if (MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
 		return -1;
 	}
+	
 
-	//int bytes = 0;
+	// //int bytes = 0;
+
+	// //start by reading first datablock
+	// void *bounce = (void*)malloc(BLOCK_SIZE);
+	// if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
+	// //if (block_read((fdir[fd].offset)/BLOCK_SIZE + superblock.dataBlockStart + 1, bounce));
+	// 	return -1;
+	// int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
+	// //int tempDB = (fdir[fd].offset)/BLOCK_SIZE + superblock.dataBlockStart + 1;
+	// int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
+	// int i = 0;
+
+	// while (i < count) {
+	// if (bounceOffset >= BLOCK_SIZE) {
+	// 	tempDB++;
+	// 	block_read((size_t)tempDB, bounce);
+	// 	bounceOffset = 0;
+		
+
+	// }
+
+	// memcpy(&buf[i], &bounce[bounceOffset], i); // |          |           |           |
+	// //fdir[fd].offset += BLOCK_SIZE-bounceOffset;
+	
+	// bounceOffset++;
+	
+	// i++;
+	
+	// }
+	int bytes = 0;
 
 	//start by reading first datablock
 	void *bounce = (void*)malloc(BLOCK_SIZE);
-	//if (block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
-	if (block_read((fdir[fd].offset)/BLOCK_SIZE + superblock.dataBlockStart + 1, bounce))
+	int db = fdir[fd].offset / BLOCK_SIZE + 1;
+	if (block_read(db + superblock.dataBlockStart, bounce))
 		return -1;
-	//int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
-	int tempDB = (fdir[fd].offset)/BLOCK_SIZE + superblock.dataBlockStart + 1;
+	int tempDB = db + superblock.dataBlockStart;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
-	int i = 0;
 
-	while (i < count) {
-	if (bounceOffset >= BLOCK_SIZE) {
-		tempDB++;
-		bounceOffset = 0;
-		if (block_read(tempDB + superblock.dataBlockStart + 1, bounce));
-		return -1;
 
+	for(int i = 0; i < count; i++) {
+		if (bounceOffset >= BLOCK_SIZE) {
+			//next data block
+			tempDB++;
+			block_read((size_t)(tempDB), bounce);
+			bounceOffset = 0;
+
+		  }
+		memcpy(&buf[i], &bounce[bounceOffset], 1);
+		bytes++;
+		if (fdir[fd].offset >= fs_stat(fd))
+			return bytes;
+		
+		bounceOffset++;
 	}
-
-	memcpy(&buf[i], &bounce[bounceOffset], i); // |          |           |           |
-	//fdir[fd].offset += BLOCK_SIZE-bounceOffset;
-	
-	bounceOffset++;
-	
-	i++;
-	
-	}
-
-	return i;
+	printf("%d\n", bytes);
+	return bytes;
 }
 
