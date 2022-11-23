@@ -324,7 +324,7 @@ int dbFind(int fd, size_t offset) {
 	int dbIndex;
 	 for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
-            return rd[i].firstBlockIn + offset;
+            return rd[i].firstBlockIn;
 		}
 	 }
 	
@@ -416,12 +416,13 @@ int rootIn;
 	 }
 	//start by reading first datablock
 	void *bounce = (void*)malloc(BLOCK_SIZE);
-	//(block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce))
-	if (block_read(fdir[fd].offset/BLOCK_SIZE + 1 + superblock.dataBlockStart, bounce))
-		return -1;
+	size_t db = fdir[fd].offset / BLOCK_SIZE;
+	block_read(dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart, bounce);
+	// if (block_read(db + 1 + superblock.dataBlockStart, bounce))
+	// 	return -1;
 	
-	//int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
-	int tempDB = fdir[fd].offset/BLOCK_SIZE + 1 + superblock.dataBlockStart;
+	int tempDB = dbFind(fd, fdir[fd].offset) + superblock.dataBlockStart;
+	//int tempDB = fdir[fd].offset/BLOCK_SIZE + 1 + superblock.dataBlockStart;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 	int i = 0;
 	int bytes = 0;
