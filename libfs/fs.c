@@ -350,8 +350,10 @@ int emptyFat() {
 	uint16_t FAT_EOC = 0xFFFF;
 	int i = 1;
 	for(i; i<superblock.dataBlockCt; i++) {
-		if(fat.flatArray[i] == 0)
-			return i;
+		if(fat.flatArray[i] == 0) {
+            fat.flatArray[i] = FAT_EOC;
+            return i;
+        }
 	}
 	return -1;
 }
