@@ -373,6 +373,12 @@ int fs_write(int fd, void *buf, size_t count)
     if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
         return -1;
     }
+
+    if(fs_stat(fd) == 0) {
+        int nFat = emptyFat();
+        rd[rIn].firstBlockIn = nFat;
+
+    }
 	int curFat = emptyFat(); // delete
 	
 	int rIn = rootIn(fd);
@@ -388,11 +394,7 @@ int fs_write(int fd, void *buf, size_t count)
 
 	//rd[rIn].firstBlockIn = rIn;
 
-	// if(rd[rIn].fileSize == 0) {
-	// 	int nFat = emptyFat();
-	// 	fat.flatArray[tempDB] = nFat;
-		
-	// }
+
 	int i = 0;
 	size_t reset = 0;
 	int nFat = emptyFat();
