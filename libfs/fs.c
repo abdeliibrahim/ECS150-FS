@@ -429,9 +429,14 @@ int fs_write(int fd, void *buf, size_t count)
 		bounceOffset = 0;
 		//tempDB++;
 		
-		 tempDB = fat.flatArray[tempCur] + superblock.dataBlockStart;
-		 fat.flatArray[nFat] = 0xFFFF;
-		 int nFat = emptyFat();
+//		 tempDB = fat.flatArray[tempCur] + superblock.dataBlockStart;
+//		 fat.flatArray[nFat] = 0xFFFF;
+//		 int nFat = emptyFat();
+        int nextFatBlock = emptyFat();
+        if(nextFatBlock != -1) {
+            tempDB = nextFatBlock;
+            block_read(tempDB+superblock.dataBlockStart, bounce);
+        }
 	}
 	
 	/*
