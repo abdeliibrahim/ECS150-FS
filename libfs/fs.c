@@ -377,12 +377,13 @@ int fs_write(int fd, void *buf, size_t count)
     }
 	//int curFat = emptyFat(); // delete
 
+    int rIn = rootIn(fd);
     if(fs_stat(fd) == 0) {
         int nFat = emptyFat();
         rd[rIn].firstBlockIn = nFat;
     }
 	
-	int rIn = rootIn(fd);
+
     void *bounce = (void*)malloc(BLOCK_SIZE);
 	int db = dbFind2(fd, fdir[fd].offset);
 	// int db = emptyFat();
