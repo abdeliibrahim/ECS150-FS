@@ -373,11 +373,14 @@ int fs_write(int fd, void *buf, size_t count)
     if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
         return -1;
     }
-	int curFat = emptyFat(); // delete
+	//int curFat = emptyFat(); // delete
 	
 	int rIn = rootIn(fd);
     void *bounce = (void*)malloc(BLOCK_SIZE);
 	int db = dbFind2(fd, fdir[fd].offset);
+	// int db = emptyFat();
+	int curFat = emptyFat();
+	
 	
 	//fat.flatArray[db] = curFat;
 	// if (block_read(db + superblock.dataBlockStart, bounce))
