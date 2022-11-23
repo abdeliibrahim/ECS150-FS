@@ -324,11 +324,40 @@ int dbFind(int fd, size_t offset) {
 	int dbIndex;
 	 for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
         if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
-            return rd[i].firstBlockIn;
+            return rd[i].firstBlockIn + (offset/BLOCK_SIZE);
 		}
 	 }
 	
 }
+int dbFind2(int fd, size_t offset) {
+	int dbIndex;
+	 for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
+            return i;
+		}
+	 }
+	
+}
+int rootIn(fd) {
+ for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
+        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
+            return i;
+		}
+
+}
+}
+int emptyFat() {
+	uint16_t FAT_EOC = 0xFFFF;
+	int i = 0;
+	for(i; i<superblock.dataBlockCt; i++) {
+
+		if(fat.flatArray[i] == 0)
+		fat.flatArray[i] == FAT_EOC;
+			return i;
+	}
+	return -1;
+}
+
 
 
 
@@ -346,25 +375,31 @@ int fs_write(int fd, void *buf, size_t count)
     if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
         return -1;
     }
-
+	int rIn = rootIn(fd);
     void *bounce = (void*)malloc(BLOCK_SIZE);
-	int db = fdir[fd].offset / BLOCK_SIZE;
-	if (block_read(db + superblock.dataBlockStart, bounce))
-		return -1;
+	int db = dbFind2(fd, fdir[fd].offset);
+	// if (block_read(db + superblock.dataBlockStart, bounce))
+	// 	return -1;
 	int tempDB = db + superblock.dataBlockStart;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
-	
+	rd[rIn].firstBlockIn = rIn;
 
 	int i = 0;
 	while (i < count) {
+		if (i >= BLOCK_SIZE) {
+			tempDB++;
+		}
 		memcpy(&bounce[bounceOffset], &buf[i], 1);
-		block_write((size_t)tempDB, bounce);
+		
 		fdir[fd].offset++;
 		
 		bounceOffset++;
 		i++;
+		rd[rIn].fileSize++;
 	}
+	printf("%d\n", tempDB);
+	block_write((size_t)tempDB, bounce);
 
 	
 

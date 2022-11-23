@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
 	/* Read some data */
 	fs_lseek(fd, 12);
-	
+	fs_ls();
 	ret = fs_read(fd, data, 10);
 	
 	ASSERT(ret == 10, "fs_read");
