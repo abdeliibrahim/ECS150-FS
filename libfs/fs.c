@@ -376,6 +376,11 @@ int fs_write(int fd, void *buf, size_t count)
         return -1;
     }
 	//int curFat = emptyFat(); // delete
+
+    if(fs_stat(fd) == 0) {
+        int nFat = emptyFat();
+        rd[rIn].firstBlockIn = nFat;
+    }
 	
 	int rIn = rootIn(fd);
     void *bounce = (void*)malloc(BLOCK_SIZE);
