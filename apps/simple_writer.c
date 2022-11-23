@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 	ASSERT(!ret, "fs_create");
 
 	fd = fs_open("myfile");
+	
 	ASSERT(fd >= 0, "fs_open");
 
 	/* Write some data */

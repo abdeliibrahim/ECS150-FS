@@ -29,12 +29,15 @@ int main(int argc, char *argv[])
 	ret = fs_mount(diskname);
 	ASSERT(!ret, "fs_mount");
 
+
 	/* Open file */
-	fd = fs_open("myfile");
+	fd = fs_open("myfile.txt");
+
 	ASSERT(fd >= 0, "fs_open");
 
 	/* Read some data */
 	fs_lseek(fd, 12);
+	
 	ret = fs_read(fd, data, 10);
 	ASSERT(ret == 10, "fs_read");
 	ASSERT(!strncmp(data, "mnopqrstuv", 10), "fs_read");

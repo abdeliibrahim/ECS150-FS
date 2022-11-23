@@ -1,3 +1,4 @@
 MOUNT
-CREATE	test2file.txt
-OPEN	test2file.txt
+CREATE	testfile
+OPEN	testfile
+UMOUNT
