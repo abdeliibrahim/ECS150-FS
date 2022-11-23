@@ -386,7 +386,7 @@ int fs_write(int fd, void *buf, size_t count)
 	fat.flatArray[tempDB] = curFat;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
-	rd[rIn].firstBlockIn = rIn;
+		
 
 	// if(rd[rIn].fileSize == 0) {
 	// 	int nFat = emptyFat();
@@ -410,14 +410,17 @@ int fs_write(int fd, void *buf, size_t count)
 					bounceOffset++;
 					i++;
 					reset++;
+					
 					rd[rIn].fileSize++;
 					if (i >= count)
+					
 						break;
 					
 				}
 		
 		printf("%d\n", tempDB);
-		
+		if(rd[rIn].fileSize > 0) 
+			rd[rIn].firstBlockIn = rIn;
 		block_write((size_t)tempDB, bounce);
 		reset = 0;
 		bounceOffset = 0;
