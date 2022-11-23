@@ -379,17 +379,17 @@ int fs_write(int fd, void *buf, size_t count)
         rd[rIn].firstBlockIn = nFat;
 
     }
-	int curFat = emptyFat(); // delete
+
+    //int curFat = emptyFat(); // delete
 	
 	int rIn = rootIn(fd);
     void *bounce = (void*)malloc(BLOCK_SIZE);
 	int db = dbFind2(fd, fdir[fd].offset);
 	
 	//fat.flatArray[db] = curFat;
-	// if (block_read(db + superblock.dataBlockStart, bounce))
-	// 	return -1;
+
 	int tempDB = db + superblock.dataBlockStart;
-	fat.flatArray[tempDB] = curFat;
+	//fat.flatArray[tempDB] = curFat;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
 	//rd[rIn].firstBlockIn = rIn;
@@ -397,14 +397,22 @@ int fs_write(int fd, void *buf, size_t count)
 
 	int i = 0;
 	size_t reset = 0;
-	int nFat = emptyFat();
+	// int nFat = emptyFat();
+    if (block_read(db + superblock.dataBlockStart, bounce))
+        return -1;
 	while (i < count) {
-		nFat = emptyFat();
-		fat.flatArray[curFat] = nFat;
+		//nFat = emptyFat();
+		//fat.flatArray[curFat] = nFat;
+        if(fs_stat(fd) <= fdir[fd].offset) {
+
+        }
+        if(bounceOffset >= BLOCK_SIZE) {
+            bounceOffset = 0;
+        }
 		
-		int tempCur = curFat;
-		curFat = nFat;
-				while (reset <  BLOCK_SIZE) {
+		//int tempCur = curFat;
+		//curFat = nFat;
+				while (reset <=  BLOCK_SIZE) {
 				
 					memcpy(&bounce[bounceOffset], &buf[i], 1);
 					
@@ -413,21 +421,25 @@ int fs_write(int fd, void *buf, size_t count)
 					i++;
 					reset++;
 					rd[rIn].fileSize++;
+
+
 					if (i >= count)
-						break;
+                        return i;
 					
 				}
 		
 		printf("%d\n", tempDB);
 		
 		block_write((size_t)tempDB, bounce);
-		reset = 0;
-		bounceOffset = 0;
+		//reset = 0;
+
+
 		//tempDB++;
+
 		
-		 tempDB = fat.flatArray[tempCur] + superblock.dataBlockStart;
-		 fat.flatArray[nFat] = 0xFFFF;
-		 int nFat = emptyFat();
+		 //tempDB = fat.flatArray[tempCur] + superblock.dataBlockStart;
+		 //fat.flatArray[nFat] = 0xFFFF;
+		 //int nFat = emptyFat();
 	}
 	
 	/*
