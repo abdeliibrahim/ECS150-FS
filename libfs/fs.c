@@ -409,32 +409,38 @@ int fs_write(int fd, void *buf, size_t count)
 		
 		//int tempCur = curFat;
 		//curFat = nFat;
-				while (reset <=  BLOCK_SIZE) {
+				while (bounceOffset <=  BLOCK_SIZE) {
 				
 					memcpy(&bounce[bounceOffset], &buf[i], 1);
 					
 					fdir[fd].offset++;
 					bounceOffset++;
 					i++;
-					reset++;
+					//reset++;
                     if(fs_stat(fd) <= fdir[fd].offset) {
                         rd[rIn].fileSize++;
                     }
 
-					if (i >= count)
+                    //small operations
+					if (i >= count){
+                        block_write((size_t)tempDB, bounce);
                         return i;
+                    }
 					
 				}
 		
 		printf("%d\n", tempDB);
 		
 		block_write((size_t)tempDB, bounce);
-		reset = 0;
+		// reset = 0;
         if(bounceOffset >= BLOCK_SIZE) {
             bounceOffset = 0;
             int nextFatBlock = emptyFat();
             if(nextFatBlock != 0xFFFF) {
                 tempDB = nextFatBlock;
+                block_read(tempDB+superblock.dataBlockStart, bounce);
+            } else {
+                return i;
             }
 
         }
