@@ -348,11 +348,9 @@ int rootIn(fd) {
 }
 int emptyFat() {
 	uint16_t FAT_EOC = 0xFFFF;
-	int i = 0;
+	int i = 1;
 	for(i; i<superblock.dataBlockCt; i++) {
-
 		if(fat.flatArray[i] == 0)
-		fat.flatArray[i] == FAT_EOC;
 			return i;
 	}
 	return -1;
@@ -375,41 +373,79 @@ int fs_write(int fd, void *buf, size_t count)
     if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || buf == NULL || fdir[fd].filename[0] == '\0') {
         return -1;
     }
+	int curFat = emptyFat(); // delete
+	
 	int rIn = rootIn(fd);
     void *bounce = (void*)malloc(BLOCK_SIZE);
 	int db = dbFind2(fd, fdir[fd].offset);
+	
+	//fat.flatArray[db] = curFat;
 	// if (block_read(db + superblock.dataBlockStart, bounce))
 	// 	return -1;
 	int tempDB = db + superblock.dataBlockStart;
+	fat.flatArray[tempDB] = curFat;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
 
 	rd[rIn].firstBlockIn = rIn;
 
+	// if(rd[rIn].fileSize == 0) {
+	// 	int nFat = emptyFat();
+	// 	fat.flatArray[tempDB] = nFat;
+		
+	// }
 	int i = 0;
 	size_t reset = 0;
+	int nFat = emptyFat();
 	while (i < count) {
-		while (reset <  BLOCK_SIZE) {
-		memcpy(&bounce[bounceOffset], &buf[i], 1);
+		nFat = emptyFat();
+		fat.flatArray[curFat] = nFat;
 		
-		fdir[fd].offset++;
-		bounceOffset++;
-		i++;
-		reset++;
-		rd[rIn].fileSize++;
+		int tempCur = curFat;
+		curFat = nFat;
+				while (reset <  BLOCK_SIZE) {
+				
+					memcpy(&bounce[bounceOffset], &buf[i], 1);
+					
+					fdir[fd].offset++;
+					bounceOffset++;
+					i++;
+					reset++;
+					rd[rIn].fileSize++;
+					if (i >= count)
+						break;
+					
+				}
 		
-		}
 		printf("%d\n", tempDB);
+		
 		block_write((size_t)tempDB, bounce);
 		reset = 0;
-		tempDB++;
+		bounceOffset = 0;
+		//tempDB++;
+		
+		 tempDB = fat.flatArray[tempCur] + superblock.dataBlockStart;
+		 fat.flatArray[nFat] = 0xFFFF;
+		 int nFat = emptyFat();
 	}
 	
+	/*
+	set fat[cur] to next available fat
+	set tempcur to cur
+	set cur to next fat
+
+	fill block with data
+	write block to disk
+	update tempDB with fat[tempcur]
+	
+	*/
+
 	
 
-	
 
-
-
+	// for(i; i<superblock.dataBlockCt; i++) {
+	// 	if(fat.flatArray[i] == 0)
+	// 	fat.flatArray[i] = 0xFFFF;
+	// } // delete
     return i;
 }
 
@@ -447,6 +483,7 @@ int fs_read(int fd, void *buf, size_t count)
 	if (MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0' || buf == NULL) {
 		return -1;
 	}
+	
 int rootIn;
 	//int bytes = 0;
 	for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
@@ -482,6 +519,9 @@ int rootIn;
 	//fdir[fd].offset += BLOCK_SIZE-bounceOffset;
 	
 	tempDB++;
+	// db  = fat.flatArray[db];
+	
+	// tempDB = db + superblock.dataBlockStart;
 	block_read((size_t)(tempDB), bounce);
 	bounceOffset = 0;
 	
