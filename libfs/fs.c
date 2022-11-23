@@ -374,6 +374,7 @@ int fs_write(int fd, void *buf, size_t count)
         return -1;
     }
 
+    // if the file size is zero, it means the first block indext is 0xFFFF, so we have to allocate a block
     if(fs_stat(fd) == 0) {
         int nFat = emptyFat();
         rd[rIn].firstBlockIn = nFat;
