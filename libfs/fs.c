@@ -374,6 +374,7 @@ int fs_write(int fd, void *buf, size_t count)
         return -1;
     }
 
+    int rIn = rootIn(fd);
     // if the file size is zero, it means the first block indext is 0xFFFF, so we have to allocate a block
     if(fs_stat(fd) == 0) {
         int nFat = emptyFat();
@@ -383,7 +384,7 @@ int fs_write(int fd, void *buf, size_t count)
 
     //int curFat = emptyFat(); // delete
 	
-	int rIn = rootIn(fd);
+
     void *bounce = (void*)malloc(BLOCK_SIZE);
 	int db = dbFind2(fd, fdir[fd].offset);
 	
@@ -433,17 +434,15 @@ int fs_write(int fd, void *buf, size_t count)
 		
 		block_write((size_t)tempDB, bounce);
 		// reset = 0;
-        if(bounceOffset >= BLOCK_SIZE) {
+
             bounceOffset = 0;
             int nextFatBlock = emptyFat();
             if(nextFatBlock != -1) {
                 tempDB = nextFatBlock;
                 block_read(tempDB+superblock.dataBlockStart, bounce);
-            } else {
-                return i;
             }
 
-        }
+
 
 		//tempDB++;
 
