@@ -257,7 +257,7 @@ int fs_open(const char *filename)
         	}
     	}
 	// VALIDATION
-	if (MOUNTED == -1 || strlen(filename) > FS_FILENAME_LEN || filename == NULL || fExists)
+	if (MOUNTED == -1 || strlen(filename) >= FS_FILENAME_LEN || filename == NULL || fExists)
 		return -1;
 
 	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
@@ -276,7 +276,7 @@ int fs_open(const char *filename)
 
 int fs_close(int fd)
 {
-	if (fdir[fd].filename[0] == '\0' || MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0)
+	if (fdir[fd].filename[0] == '\0' || MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0)
 		return -1;
 	fdir[fd].filename[0] = '\0';
 	fdir[fd].offset = 0;
@@ -290,7 +290,7 @@ int fs_stat(int fd)
 {
 	/* TODO: Phase 3 */
     // Return -1 if no FS is currently mounted, or fd is out of bound, or it is not currently open
-    if(MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
@@ -308,7 +308,7 @@ int fs_stat(int fd)
 int fs_lseek(int fd, size_t offset)
 {
 	// to do: check if fd is valid
-    if(MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
