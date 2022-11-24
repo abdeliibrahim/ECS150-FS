@@ -404,7 +404,9 @@ int fs_write(int fd, void *buf, size_t count)
 	// 	fat.flatArray[tempDB] = nFat;
 		
 	// }
-
+if (db != 0xFFFF) {
+		block_read(db + superblock.dataBlockStart + dbStart, bounce);
+	}
 
 	int i = 0;
 	size_t reset = 0;
