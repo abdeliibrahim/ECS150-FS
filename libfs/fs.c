@@ -363,9 +363,9 @@ int emptyFat() {
 
 int fs_write(int fd, void *buf, size_t count)
 {
-		for (int w = 1; w <= 5; w++) {
-		printf("fat[%d] = %d", w, fat.flatArray[w]);
-	}
+	// 	for (int w = 1; w <= 5; w++) {
+	// 	printf("fat[%d] = %d", w, fat.flatArray[w]);
+	// }
     /* TODO: Phase 4 */
 	/* what needs to be done :
 		IDEAL CASE: to be written fits within a single datablock
@@ -443,7 +443,7 @@ if (db != 0xFFFF) {
 		 }
 		 
 		db = nFat;
-		printf("%d\n", tempDB);
+		//printf("%d\n", tempDB);
 		
 		block_write((size_t)tempDB + dbStart, bounce);
 
@@ -469,9 +469,9 @@ if(rd[rIn].fileSize > 0)
 
 
 
-	for (int w = 1; w <= 5; w++) {
-		printf("fat[%d] = %d", w, fat.flatArray[w]);
-	}
+	// for (int w = 1; w <= 5; w++) {
+	// 	printf("fat[%d] = %d", w, fat.flatArray[w]);
+	// }
     return i;
 }
 
