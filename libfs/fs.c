@@ -308,7 +308,7 @@ int fs_stat(int fd)
 int fs_lseek(int fd, size_t offset)
 {
 	// to do: check if fd is valid
-    if(MOUNTED == -1 || fd > FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
+    if(MOUNTED == -1 || fd >= FS_OPEN_MAX_COUNT || fd < 0 || fdir[fd].filename[0] == '\0') {
         return -1;
     }
 
@@ -329,14 +329,19 @@ int dbFind(int fd, size_t offset) {
 	 }
 	
 }
-int dbFind2(int fd, size_t offset) {
-	int dbIndex;
-	 for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
-        if(strcmp((char*)fdir[fd].filename, (char*)rd[i].filename) == 0){
-            return i;
-		}
-	 }
-	
+int dbFind2(int start, size_t offset) {
+    size_t counter = BLOCK_SIZE-1;
+    for(int i=start; i<superblock.dataBlockCt; i=start) {
+        while(offset >counter && start!= 0xFFFF) {
+
+            start = fat.flatArray[start];
+            if(fat.flatArray[start] == 0xFFFF) {
+                return start;
+            }
+        }
+        counter +=BLOCK_SIZE;
+    }
+    return start;
 }
 int rootIn(fd) {
  for(int i=0; i < FS_FILE_MAX_COUNT; i++) {
@@ -351,6 +356,7 @@ int emptyFat() {
 	int i = 1;
 	for(i; i<superblock.dataBlockCt; i++) {
 		if(fat.flatArray[i] == 0)
+            fat.flatArray[i] =FAT_EOC;
 			return i;
 	}
 	return -1;
@@ -381,9 +387,10 @@ int fs_write(int fd, void *buf, size_t count)
         rd[rIn].firstBlockIn = nFat;
 
     }
+    int start = rd[rIn].firstBlockIn;
 
     void *bounce = (void*)malloc(BLOCK_SIZE);
-	int db = dbFind2(fd, fdir[fd].offset);
+	int db = dbFind2(start, fdir[fd].offset);
 
 	int tempDB = db + superblock.dataBlockStart;
 	int bounceOffset = fdir[fd].offset % BLOCK_SIZE;
@@ -405,11 +412,7 @@ int fs_write(int fd, void *buf, size_t count)
                 rd[rIn].fileSize++;
             }
 
-            //small operations
-            if (i >= count){
-                block_write((size_t)tempDB, bounce);
-                return i;
-            }
+
 					
         }
 		
@@ -417,11 +420,18 @@ int fs_write(int fd, void *buf, size_t count)
 		
 		block_write((size_t)tempDB, bounce);
         bounceOffset = 0;
-        int nextFatBlock = emptyFat();
-        if(nextFatBlock != -1) {
-            tempDB = nextFatBlock;
-            block_read(tempDB+superblock.dataBlockStart, bounce);
+
+        if(fdir[fd].offset > fs_stat(fd)) {
+            int nextFatBlock = emptyFat();
+            if(nextFatBlock != -1) {
+                tempDB = nextFatBlock;
+
+            }
+        } else {
+            tempDB = dbFind2(rd[rIn].firstBlockIn, fdir[fd].offset);
         }
+        block_read(tempDB+superblock.dataBlockStart, bounce);
+
 	}
 
     return i;
