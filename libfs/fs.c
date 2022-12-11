@@ -107,11 +107,12 @@ int fs_umount(void)
 	if (block_write(0, &superblock))
 		
 
-	for(int i = 1; 1<= superblock.fatBlocks; i++) {
+	for(int i = 1; i<= superblock.fatBlocks; i++) {
 		if(block_write(i, &fat.flatArray[i-1]))
 			return -1;
 	}
 	
+
 	if (block_write(superblock.rootBlockIndex, &rd))
 		return -1;
 
@@ -469,9 +470,10 @@ if(rd[rIn].fileSize > 0)
 
 
 
-	// for (int w = 1; w <= 5; w++) {
-	// 	printf("fat[%d] = %d", w, fat.flatArray[w]);
-	// }
+	for (int w = 1; w <= 5; w++) {
+		printf("fat[%d] = %d", w, fat.flatArray[w]);
+	}
+	printf("\n");
     return i;
 }
 
@@ -556,6 +558,7 @@ int rootIn;
 	// db  = fat.flatArray[db];
 	
 	// tempDB = db + superblock.dataBlockStart;
+	//tempDB++;
 	tempDB = fat.flatArray[tempDB];
 	block_read((size_t)(tempDB) + superblock.dataBlockStart, bounce);
 	
